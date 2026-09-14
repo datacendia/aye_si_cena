@@ -264,3 +264,56 @@ export const priceOverrides = pgTable("price_overrides", {
   oneCurrentPerKey: uniqueIndex("price_overrides_current_idx")
     .on(t.ingredientKey).where(sql`current`)
 }));
+
+/* ─────────────────────────── the front door ─────────────────────────── */
+
+/**
+ * Every attempt to sign in, so that guessing can be made expensive.
+ *
+ * Without this the login accepted unlimited attempts at an unlimited rate, and
+ * a bcrypt hash at cost 12 is only about 250ms of protection: a fortnight of
+ * quiet requests is tens of millions of guesses against an account that can see
+ * the whole cost base. There are three logins and no sign-up page, so nobody
+ * will ever notice a limit that is generous by ordinary standards.
+ *
+ * It is a table rather than a counter in memory because the app runs in Netlify
+ * functions: each request may be a fresh process, so an in-memory counter would
+ * reset itself and protect nothing. Shared state has to be somewhere shared.
+ *
+ * Rows carry the email attempted, not whether it exists. Recording the failure
+ * against an unknown address is the point — that is what a list being tried
+ * looks like.
+ */
+export const loginAttempts = pgTable("login_attempts", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  /** Lower-cased, as typed. An address that does not exist is still recorded. */
+  email: text("email").notNull(),
+  /** From x-forwarded-for, or "unknown" when there is no proxy in front. */
+  ip: text("ip").notNull().default("unknown"),
+  ok: boolean("ok").notNull(),
+  at: timestamp("at", { mode: "date" }).notNull().defaultNow()
+}, (t) => ({
+  byEmail: index("login_attempts_email_idx").on(t.email, t.at),
+  byIp: index("login_attempts_ip_idx").on(t.ip, t.at)
+}));
+
+/**
+ * A password reset, issued by the owner and carried by hand.
+ *
+ * There is no email service here and there is not going to be one: this app
+ * costs S/0 a month to run and an SMTP account is the first thing that would
+ * change that. So a reset is a link the owner generates and sends over
+ * WhatsApp, which is how this business already talks to everybody.
+ *
+ * Only the SHA-256 of the token is stored. A leaked backup then contains
+ * nothing usable, which is the whole reason not to store the token itself.
+ */
+export const passwordResets = pgTable("password_resets", {
+  /** sha256(token), hex. The token itself is shown once and never stored. */
+  tokenHash: text("token_hash").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+  usedAt: timestamp("used_at", { mode: "date" }),
+  issuedBy: text("issued_by").references(() => users.id, { onDelete: "set null" }),
+  issuedAt: timestamp("issued_at", { mode: "date" }).notNull().defaultNow()
+}, (t) => ({ byUser: index("password_resets_user_idx").on(t.userId) }));

@@ -14,8 +14,16 @@ import { join } from "node:path";
  */
 const APP = join(__dirname, "..", "app");
 
-/** Public by deliberate exception, listed here so the choice is visible. */
-const PUBLIC_PAGES = new Set(["login"]);
+/**
+ * Public by deliberate exception, listed here so the choice is visible.
+ *
+ *   login          — obviously.
+ *   reset/[token]  — somebody who cannot sign in is exactly who needs it. The
+ *                    link is the authority: one hour, one use, and only its
+ *                    SHA-256 is stored. See the test below for what it is
+ *                    allowed to reveal.
+ */
+const PUBLIC_PAGES = new Set(["login", "reset/[token]"]);
 
 function pages(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
@@ -43,6 +51,25 @@ describe("no page renders without asking who is looking", () => {
       .filter((p) => !/require(Viewer|Can)\s*\(/.test(p.src))
       .map((p) => p.route || "/");
     expect(unguarded).toEqual([]);
+  });
+
+  it("lets the public reset page reveal one email and nothing else", () => {
+    const page = found.find((p) => p.route === "/reset/[token]")!;
+    expect(page).toBeDefined();
+
+    // It names the account the link was issued for, because somebody setting a
+    // password needs to know which one — and whoever holds the link could set
+    // it regardless. Everything past that stays behind the login: no role, no
+    // client, no quote, no dish.
+    expect(page.src).toMatch(/resetTarget/);
+    for (const forbidden of [/\bDISHES\b/, /listQuotes/, /listClients/, /\brole\b/, /clientId/]) {
+      expect(page.src).not.toMatch(forbidden);
+    }
+
+    // And it reads the copy from the code rather than the database: a query in
+    // front of this page would make it fail exactly when it is needed.
+    expect(page.src).toMatch(/staticCopy/);
+    expect(page.src).not.toMatch(/import[^;]*loadCopy/);
   });
 
   it("guards the pages that carry money with a money check, not just a login", () => {

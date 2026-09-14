@@ -23,7 +23,9 @@
     "book": "node scripts/build-book.mjs",
     "book:es": "node scripts/build-book.mjs --lang es",
     "market-run": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs",
-    "market-run:es": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs --lang es"
+    "market-run:es": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs --lang es",
+    "backup": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/backup.mjs",
+    "restore": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/restore.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

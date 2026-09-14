@@ -15,6 +15,13 @@
       "when": 1787975288778,
       "tag": "0001_rapid_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789358868097,
+      "tag": "0002_daffy_anthem",
+      "breakpoints": true
     }
   ]
 }

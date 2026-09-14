@@ -33,7 +33,8 @@ export const db = drizzle(client, { schema });
 const TABLES = [
   "quote_dishes", "quotes", "bookings", "price_overrides",
   "site_copy", "dish_edits", "accounts", "sessions",
-  "verification_tokens", "users", "clients"
+  "verification_tokens", "login_attempts", "password_resets",
+  "users", "clients"
 ];
 
 export async function migrate(): Promise<void> {
@@ -50,9 +51,39 @@ export async function migrate(): Promise<void> {
   }
 }
 
-/** Empty every table. Cheaper than a fresh database and just as isolated. */
+/**
+ * Empty every table. Cheaper than a fresh database and just as isolated.
+ *
+ * A table missing from that list does not fail loudly — it leaks rows into the
+ * next test, and the symptom is a suite that passes alone and fails in order.
+ * The check below is what turns that into a failure at the point of the
+ * mistake instead.
+ */
 export async function reset(): Promise<void> {
   await client.exec(`TRUNCATE ${TABLES.join(", ")} RESTART IDENTITY CASCADE;`);
+}
+
+/**
+ * Every table the migrations create is in TABLES.
+ *
+ * Called once by the repository suites. Adding a table to db/schema.ts and
+ * forgetting it here is the kind of mistake that shows up three suites later as
+ * a count that is wrong by exactly the number of rows some earlier test wrote.
+ */
+export async function assertResetCoversEveryTable(): Promise<void> {
+  const { rows } = await client.query<{ tablename: string }>(
+    `select tablename from pg_tables where schemaname = 'public'`
+  );
+  const missing = rows
+    .map((r) => r.tablename)
+    .filter((t) => t !== "__drizzle_migrations" && !TABLES.includes(t));
+
+  if (missing.length) {
+    throw new Error(
+      `__tests__/helpers/pglite.ts does not truncate: ${missing.join(", ")}. ` +
+      `Rows there will leak into the next test.`
+    );
+  }
 }
 
 /**

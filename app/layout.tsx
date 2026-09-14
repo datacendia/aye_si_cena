@@ -57,7 +57,8 @@ const NAV: { href: string; key: string; needs?: (r: Role) => boolean }[] = [
   { href: "/clients", key: "nav.clients", needs: CAN.manageClients },
   { href: "/bookings", key: "nav.bookings", needs: CAN.writeBookings },
   { href: "/prices", key: "nav.prices", needs: CAN.writePrices },
-  { href: "/admin", key: "nav.admin", needs: CAN.manageClients }
+  { href: "/admin", key: "nav.admin", needs: CAN.manageClients },
+  { href: "/account", key: "nav.account" }
 ];
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

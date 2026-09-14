@@ -240,7 +240,51 @@ export const COPY: Record<string, Phrase> = {
   "admin.derived": {
     en: "Read from the recipe — not editable here",
     es: "Se lee de la receta — no editable aquí", section: "admin" },
-  "admin.revertToCode": { en: "back to the default", es: "volver al valor por defecto", section: "admin" }
+  "admin.revertToCode": { en: "back to the default", es: "volver al valor por defecto", section: "admin" },
+
+  /* ── accounts ── */
+  "nav.account": { en: "Account", es: "Cuenta", section: "nav" },
+  "account.heading": { en: "Your account", es: "Su cuenta", section: "account" },
+  "account.lede": {
+    en: "Change your password. It is the only thing between the cost of 223 dishes and anybody who asks.",
+    es: "Cambie su contraseña. Es lo único entre el costo de 223 platos y cualquiera que pregunte.",
+    section: "account" },
+  "account.current": { en: "Current password", es: "Contraseña actual", section: "account" },
+  "account.new": { en: "New password", es: "Contraseña nueva", section: "account" },
+  "account.confirm": { en: "New password again", es: "Repita la contraseña nueva", section: "account" },
+  "account.change": { en: "Change it", es: "Cambiarla", section: "account" },
+  "account.changed": { en: "Changed.", es: "Cambiada.", section: "account" },
+  "account.minimum": {
+    en: "Twelve characters minimum.",
+    es: "Mínimo doce caracteres.", section: "account" },
+  "account.mismatch": {
+    en: "The two new passwords are not the same.",
+    es: "Las dos contraseñas nuevas no coinciden.", section: "account" },
+
+  "admin.logins": { en: "Logins", es: "Accesos", section: "admin" },
+  "admin.loginsLede": {
+    en: "Every account, and the two things you can do to one: switch it off, or hand its owner a link to set a new password. There is no email here — send the link over WhatsApp, the way you sent the first one.",
+    es: "Cada cuenta, y las dos cosas que puede hacer con una: desactivarla, o entregar a su dueño un enlace para poner una contraseña nueva. Aquí no hay correo — envíe el enlace por WhatsApp, como envió el primero.",
+    section: "admin" },
+  "admin.issueReset": { en: "New password link", es: "Enlace de contraseña", section: "admin" },
+  "admin.resetIssued": {
+    en: "Copy this now. It is shown once, it works for one hour, and it cannot be shown again.",
+    es: "Cópielo ahora. Se muestra una vez, sirve por una hora y no se puede volver a mostrar.",
+    section: "admin" },
+  "admin.switchOff": { en: "Switch off", es: "Desactivar", section: "admin" },
+  "admin.switchOn": { en: "Switch on", es: "Activar", section: "admin" },
+  "admin.accountOff": { en: "switched off", es: "desactivada", section: "admin" },
+  "admin.noPassword": { en: "no password set", es: "sin contraseña", section: "admin" },
+
+  "reset.heading": { en: "Set a new password", es: "Ponga una contraseña nueva", section: "reset" },
+  "reset.for": { en: "For", es: "Para", section: "reset" },
+  "reset.set": { en: "Set it", es: "Ponerla", section: "reset" },
+  "reset.gone": {
+    en: "That link has expired or has already been used. Ask for another.",
+    es: "Ese enlace venció o ya se usó. Pida otro.", section: "reset" },
+  "reset.done": {
+    en: "Done. Sign in with the new password.",
+    es: "Listo. Entre con la contraseña nueva.", section: "reset" }
 };
 
 /** A phrase book for one render: the defaults, with any saved rows over them. */

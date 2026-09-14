@@ -26,6 +26,7 @@ import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { db, assertDatabase } from "@/db";
 import { users, accounts, sessions, verificationTokens, type Role } from "@/db/schema";
+import { throttle, recordAttempt } from "@/lib/repo/logins";
 
 const Login = z.object({
   email: z.string().email().transform((s) => s.trim().toLowerCase()),
@@ -44,11 +45,27 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Credentials({
       credentials: { email: {}, password: {} },
-      async authorize(raw) {
+      async authorize(raw, request) {
         assertDatabase();
         const parsed = Login.safeParse(raw);
         if (!parsed.success) return null;
         const { email, password } = parsed.data;
+        const ip = clientIp(request);
+
+        /*
+         * Checked before the password is compared, not after. A blocked attempt
+         * must cost one index scan rather than a bcrypt round, or the limiter
+         * becomes the denial of service it exists to prevent.
+         *
+         * The refusal is silent. Saying "too many attempts" would confirm that
+         * the address is worth attacking, and the person being locked out is
+         * almost never the person who typed the wrong password.
+         */
+        const limit = await throttle(email, ip);
+        if (limit.blocked) {
+          await recordAttempt(email, ip, false);
+          return null;
+        }
 
         const [user] = await db.select().from(users).where(eq(users.email, email)).limit(1);
 
@@ -57,8 +74,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Otherwise the response time tells anyone who asks which emails are real.
         const hash = user?.passwordHash ?? DUMMY_HASH;
         const ok = await bcrypt.compare(password, hash);
+        const allowed = Boolean(user && ok && user.active && user.passwordHash);
 
-        if (!user || !ok || !user.active || !user.passwordHash) return null;
+        await recordAttempt(email, ip, allowed);
+        if (!allowed || !user) return null;
         return { id: user.id, email: user.email, name: user.name, image: user.image };
       }
     })
@@ -103,6 +122,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     }
   }
 });
+
+/**
+ * Who is asking, at the network level.
+ *
+ * Netlify puts the real client at the front of x-forwarded-for; everything
+ * after it is proxies. Taking the last entry — or trusting a header the client
+ * can set, like x-real-ip — would let anyone rotate their own counter by
+ * sending a different value, which is worse than having no per-IP limit at all
+ * because it looks like one.
+ */
+function clientIp(request: unknown): string {
+  const headers = (request as { headers?: Headers } | undefined)?.headers;
+  if (!headers || typeof headers.get !== "function") return "unknown";
+  const forwarded = headers.get("x-forwarded-for");
+  const first = forwarded?.split(",")[0]?.trim();
+  return first || "unknown";
+}
 
 /** A bcrypt hash of a value nobody knows, for the timing-equalising compare above. */
 const DUMMY_HASH = "$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";

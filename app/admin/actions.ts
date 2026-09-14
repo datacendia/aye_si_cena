@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireViewer } from "@/lib/session";
 import { saveCopy, revertCopy, saveDishEdit, revertDish } from "@/lib/repo/copy";
+import { issueReset, setActive } from "@/lib/repo/passwords";
 import { db, users } from "@/db";
 import { eq } from "drizzle-orm";
 
@@ -62,4 +63,31 @@ export async function setLocale(locale: "es" | "en") {
   const me = await requireViewer();
   await db.update(users).set({ locale }).where(eq(users.id, me.id));
   revalidatePath("/", "layout");
+}
+
+/* ─────────────────────────────── logins ─────────────────────────────── */
+
+/**
+ * Issue a one-hour, one-use link for somebody to set their own password.
+ *
+ * The absolute URL is built here rather than in the browser because the owner
+ * is going to paste it into WhatsApp, and a path on its own is not something
+ * you can send anyone. AUTH_URL is the deployment's own address, which is
+ * already required for Auth.js to work at all.
+ */
+export async function issueResetLink(userId: string): Promise<{ url: string } | string> {
+  const me = await requireViewer();
+  try {
+    const { token } = await issueReset(me, userId);
+    const base = (process.env.AUTH_URL ?? "").replace(/\/+$/, "");
+    return { url: `${base}/reset/${token}` };
+  } catch (err) {
+    return err instanceof Error ? err.message : "Could not issue a link.";
+  }
+}
+
+export async function toggleAccount(userId: string, active: boolean) {
+  const me = await requireViewer();
+  await setActive(me, userId, active);
+  revalidatePath("/admin");
 }

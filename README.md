@@ -245,7 +245,7 @@ would owe US$20 a month.
 #    neon.tech → new project → Connection Details → the POOLED string
 # 2. locally
 cp .env.example .env.local        # paste DATABASE_URL, set AUTH_SECRET
-npm run db:migrate                # nine tables
+npm run db:migrate                # eleven tables
 npm run user:create owner you@example.com "Your Name"
 npm run dev
 
@@ -269,6 +269,57 @@ DATABASE_URL="postgresql://postgres@localhost:5432/ayesicena"
 
 Neon's free tier suspends a database that has been idle a few minutes, so the
 first page load after a quiet spell pays a second or two of cold start.
+
+### Forgotten passwords
+
+There is no email service here and there is not going to be one — an SMTP
+account is the first line item that would stop this costing S/0 a month, and a
+link sitting in a spam folder on a Saturday afternoon is not a recovery path
+anyway.
+
+So the owner issues the link and sends it over WhatsApp, the way the first
+password was sent. **Admin → Logins → New password link.** It is shown once, it
+works for one hour, it works once, and only its SHA-256 reaches the database —
+so a leaked backup carries nothing anybody can sign in with.
+
+Anyone who simply wants a better password does it themselves at **Account**,
+without involving the owner at all.
+
+### Wrong passwords
+
+The login is rate limited: ten failures against one address in fifteen minutes,
+or thirty from one address on the network, and it stops answering. The refusal
+is silent — saying "too many attempts" would confirm that the address is worth
+attacking, and the person locked out is almost never the person guessing.
+Getting it right clears the count, so one typo after a bad run is not a lockout.
+
+The counters live in a table rather than in memory because the app runs in
+Netlify functions, where each request may be a fresh process and an in-memory
+counter would reset itself and protect nothing.
+
+### Backups
+
+Neon's free tier has no point-in-time recovery, and there is no `pg_dump` in a
+serverless function. So the backup runs from your laptop:
+
+```
+npm run backup                    # → backups/ayesicena-20260914T0412Z.json
+npm run restore -- backups/ayesicena-20260914T0412Z.json
+```
+
+It saves only what exists nowhere else — clients, quotes, bookings, verified
+prices, and the words you rewrote on the site. The 223 dishes and their recipes
+are in `data/`, generated from the spreadsheet and held in git; they are already
+backed up by something better than this.
+
+Password hashes are included, because a restore that leaves everybody unable to
+sign in is not a restore. That makes the file as sensitive as the database —
+keep it where you would keep the database. `backups/` is gitignored.
+
+`restore` refuses to run against a database that already has rows in it, unless
+you pass `--force`. A restore is something you reach for at the worst possible
+moment, and the failure worth designing against is not "it did not work" but
+"it ran against the live database".
 
 ## The spreadsheet is the master
 
