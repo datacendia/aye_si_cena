@@ -331,7 +331,33 @@ export const COPY: Record<string, Phrase> = {
     es: "Registre un precio dos veces y esta página empieza a responder.", section: "drift" },
   "drift.dishes": { en: "dishes carry it", es: "platos lo llevan", section: "drift" },
   "drift.overEstimate": { en: "over the estimate", es: "sobre el estimado", section: "drift" },
-  "drift.underEstimate": { en: "under the estimate", es: "bajo el estimado", section: "drift" }
+  "drift.underEstimate": { en: "under the estimate", es: "bajo el estimado", section: "drift" },
+
+  /* ── what sells against what it earns ── */
+  "nav.engineering": { en: "What sells", es: "Qué se vende", section: "nav" },
+  "eng.heading": { en: "What sells, against what it earns", es: "Qué se vende, contra lo que deja", section: "eng" },
+  "eng.lede": {
+    en: "Popularity from the quotes you won. Margin from the recipe, priced with what you actually paid at the market. Almost no kitchen can put these two numbers beside each other, because they normally live in two systems that have never spoken.",
+    es: "Popularidad de las cotizaciones ganadas. Margen de la receta, costeada con lo que pagó de verdad en el mercado. Casi ninguna cocina puede poner estos dos números juntos, porque suelen vivir en dos sistemas que nunca se han hablado.",
+    section: "eng" },
+  "eng.nothingYet": {
+    en: "Nothing has been won yet. Mark a quote won and this page starts answering.",
+    es: "Todavía no hay nada ganado. Marque una cotización como ganada y esta página empieza a responder.",
+    section: "eng" },
+  "eng.covers": { en: "covers", es: "cubiertos", section: "eng" },
+  "eng.quotes": { en: "quotes", es: "cotizaciones", section: "eng" },
+  "eng.margin": { en: "per cover", es: "por cubierto", section: "eng" },
+  "eng.contribution": { en: "earned", es: "ganado", section: "eng" },
+  "eng.bleeding": { en: "Selling well, costing too much", es: "Se vende bien, cuesta demasiado", section: "eng" },
+  "eng.bleedingLede": {
+    en: "Popular and over the food-cost target. Every extra one you sell makes this bigger — it is the sharpest thing on this page.",
+    es: "Populares y por encima del costo objetivo. Cada uno más que vende lo agranda — es lo más urgente de esta página.",
+    section: "eng" },
+  "eng.neverQuoted": { en: "Never offered", es: "Nunca ofrecidos", section: "eng" },
+  "eng.neverQuotedLede": {
+    en: "Not dogs. Nobody has put these in front of a client yet, which is a different sentence entirely — and a menu decision taken on the wrong one removes a dish that was never given a chance.",
+    es: "No son perros. Nadie los ha puesto delante de un cliente todavía, que es una frase completamente distinta — y una decisión tomada sobre la equivocada quita un plato que nunca tuvo oportunidad.",
+    section: "eng" }
 };
 
 /** A phrase book for one render: the defaults, with any saved rows over them. */

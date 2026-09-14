@@ -13,7 +13,7 @@
  * price and cost each dish carried at the moment of quoting - because that is
  * what you charged, and it must still say so after the menu is repriced.
  */
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db, quotes, quoteDishes, clients } from "@/db";
 import type { QuoteStatus } from "@/db/schema";
 import { quoteScope, CAN, assertCan } from "@/lib/permissions";
@@ -22,6 +22,7 @@ import { DISHES } from "@/data/dishes";
 import { buildQuote } from "@/lib/pricing";
 import type { ServiceTier } from "@/lib/dishes";
 import { DISTRICTS, VENUE_TYPES } from "@/data/venues";
+import type { Sold } from "@/lib/engineering";
 
 export interface QuoteInput {
   name: string;
@@ -212,4 +213,36 @@ export async function getQuote(me: Viewer, id: string): Promise<SavedQuote | nul
     status: row.q.status as QuoteStatus,
     dishIds: links.map((l) => l.dishId)
   };
+}
+
+/**
+ * What actually sold, from the quotes you won.
+ *
+ * Aggregated in SQL rather than by loading every quote and counting in
+ * JavaScript: this is the join that makes the menu engineering matrix possible
+ * at all, and it is a few hundred rows on a free tier that sleeps.
+ *
+ * Only won quotes count. A draft is a thing you were thinking about and a lost
+ * quote is a thing somebody else cooked; counting either as popularity would
+ * measure what you offer rather than what people chose.
+ *
+ * priceAtQuote, not the menu price. That is what the client was charged, and
+ * repricing the menu must not rewrite last March's margin.
+ */
+export async function soldDishes(me: Viewer): Promise<Sold[]> {
+  assertCan(CAN.seeMoney, me.role, "see what has sold and what it earned");
+
+  const rows = await db
+    .select({
+      dishId: quoteDishes.dishId,
+      quotes: sql<number>`count(distinct ${quotes.id})::int`,
+      covers: sql<number>`coalesce(sum(${quotes.guests}), 0)::int`,
+      averagePrice: sql<number>`coalesce(avg(${quoteDishes.priceAtQuote}), 0)::double precision`
+    })
+    .from(quoteDishes)
+    .innerJoin(quotes, eq(quotes.id, quoteDishes.quoteId))
+    .where(eq(quotes.status, "won"))
+    .groupBy(quoteDishes.dishId);
+
+  return rows;
 }

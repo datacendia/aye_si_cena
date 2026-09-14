@@ -54,6 +54,7 @@ const NAV: { href: string; key: string; needs?: (r: Role) => boolean }[] = [
   { href: "/packages", key: "nav.packages" },
   { href: "/builder", key: "nav.builder", needs: CAN.writeQuotes },
   { href: "/quotes", key: "nav.quotes", needs: CAN.writeQuotes },
+  { href: "/engineering", key: "nav.engineering", needs: CAN.seeMoney },
   { href: "/clients", key: "nav.clients", needs: CAN.manageClients },
   { href: "/bookings", key: "nav.bookings", needs: CAN.writeBookings },
   { href: "/take", key: "nav.take", needs: CAN.seeKitchen },

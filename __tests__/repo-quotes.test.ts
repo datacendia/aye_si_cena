@@ -16,7 +16,8 @@ jest.mock("@/db", () => require("./helpers/pglite").mockModule());
 
 import { db, migrate, reset, close, makeUser, makeClient, fakeViewer } from "./helpers/pglite";
 import {
-  createQuote, updateQuote, getQuote, listQuotes, setQuoteStatus, deleteQuote
+  createQuote, updateQuote, getQuote, listQuotes, setQuoteStatus, deleteQuote,
+  soldDishes
 } from "@/lib/repo/quotes";
 import { quotes, quoteDishes } from "@/db/schema";
 import { DISHES } from "@/data/dishes";
@@ -216,5 +217,64 @@ describe("who may read — the part that leaks if it is wrong", () => {
   it("returns an empty list rather than throwing when there is nothing", async () => {
     expect(await listQuotes(owner)).toEqual([]);
     expect(await getQuote(owner, "nope")).toBeNull();
+  });
+});
+
+describe("what actually sold — the popularity half of the menu matrix", () => {
+  const won = async (guests: number, dishIds: number[]) => {
+    const id = await createQuote(owner, draft({ guests, dishIds }));
+    await setQuoteStatus(owner, id, "won");
+    return id;
+  };
+
+  it("counts covers, not quotes — one wedding for 200 is not one canapé", async () => {
+    await won(200, [DISHES[0].id]);
+    await won(20, [DISHES[1].id]);
+    await won(20, [DISHES[1].id]);
+
+    const sold = await soldDishes(owner);
+    const a = sold.find((s) => s.dishId === DISHES[0].id)!;
+    const b = sold.find((s) => s.dishId === DISHES[1].id)!;
+
+    expect(a).toMatchObject({ covers: 200, quotes: 1 });
+    expect(b).toMatchObject({ covers: 40, quotes: 2 });
+  });
+
+  it("counts only what was won — a draft is a thought and a loss is somebody else's job", async () => {
+    await won(100, [DISHES[0].id]);
+    await createQuote(owner, draft({ guests: 500, dishIds: [DISHES[0].id] }));
+    const lost = await createQuote(owner, draft({ guests: 500, dishIds: [DISHES[0].id] }));
+    await setQuoteStatus(owner, lost, "lost");
+    const sent = await createQuote(owner, draft({ guests: 500, dishIds: [DISHES[0].id] }));
+    await setQuoteStatus(owner, sent, "sent");
+
+    expect(await soldDishes(owner)).toEqual([
+      expect.objectContaining({ dishId: DISHES[0].id, covers: 100, quotes: 1 })
+    ]);
+  });
+
+  it("averages the price as quoted, so repricing the menu cannot rewrite history", async () => {
+    const id = await won(20, [DISHES[0].id]);
+    const [sold] = await soldDishes(owner);
+    expect(sold.averagePrice).toBeCloseTo(DISHES[0].price, 4);
+    expect(id).toBeTruthy();
+  });
+
+  it("does not multiply covers by the number of dishes on the quote", async () => {
+    // The classic join bug: three dishes on one quote for 60 must not read as
+    // 180 covers each.
+    await won(60, DISHES.slice(0, 3).map((d) => d.id));
+    const sold = await soldDishes(owner);
+    expect(sold).toHaveLength(3);
+    for (const s of sold) expect(s.covers).toBe(60);
+  });
+
+  it("is empty rather than throwing when nothing has been won", async () => {
+    expect(await soldDishes(owner)).toEqual([]);
+  });
+
+  it("a chef may not see it — the whole page is about money", async () => {
+    await expect(soldDishes(chef)).rejects.toThrow(/Not permitted/);
+    await expect(soldDishes(fakeViewer("client"))).rejects.toThrow(/Not permitted/);
   });
 });
