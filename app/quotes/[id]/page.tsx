@@ -5,7 +5,7 @@ import { requireViewer } from "@/lib/session";
 import { getQuote } from "@/lib/repo/quotes";
 import { CAN, visibleDishes } from "@/lib/permissions";
 import { soles, TIERS, IGV_RATE } from "@/lib/pricing";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 import { markQuote, removeQuote } from "../actions";
 import { getClient, dietClashes } from "@/lib/repo/clients";
@@ -23,6 +23,7 @@ export const metadata: Metadata = { title: "Quote" };
  */
 export default async function QuotePage({ params }: { params: Promise<{ id: string }> }) {
   const me = await requireViewer();
+  const dishes = await menu(me.locale);
   const { id } = await params;
   const q = await getQuote(me, id);
   // Null covers both "no such quote" and "not yours". Telling them apart would
@@ -30,7 +31,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
   if (!q) notFound();
 
   const money = CAN.seeMoney(me.role);
-  const picked = DISHES.filter((d) => q.dishIds.includes(d.id));
+  const picked = dishes.filter((d) => q.dishIds.includes(d.id));
   const chosen = visibleDishes(picked, me.role);
 
   /*

@@ -2,12 +2,13 @@ import { requireViewer } from "@/lib/session";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TIERS, STAFF_SHIFT_COST, CHEF_SHIFT_COST, IGV_RATE, soles } from "@/lib/pricing";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 
 export const metadata: Metadata = { title: "Packages" };
 
 export default async function PackagesPage() {
-  await requireViewer();
+  const me = await requireViewer();
+  const dishes = await menu(me.locale);
 
   return (
     <>
@@ -21,7 +22,7 @@ export default async function PackagesPage() {
 
       <section className="grid gap-5 py-10 sm:grid-cols-3">
         {Object.values(TIERS).map((t) => {
-          const eligible = DISHES.filter((d) => d.tiers.includes(t.id)).length;
+          const eligible = dishes.filter((d) => d.tiers.includes(t.id)).length;
           return (
             <div key={t.id} className="rounded-xl border border-line bg-surface p-6">
               <h2 className="font-display text-2xl font-semibold">{t.name}</h2>

@@ -2,13 +2,14 @@ import { visibleDishes } from "@/lib/permissions";
 import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import Seasonal from "@/components/Seasonal";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 import { INGREDIENTS } from "@/data/ingredients";
 
 export const metadata: Metadata = { title: "Season" };
 
 export default async function SeasonalPage() {
   const me = await requireCan(CAN.seeKitchen, "see the season and the vedas");
+  const dishes = await menu(me.locale);
 
   return (
     <>
@@ -23,7 +24,7 @@ export default async function SeasonalPage() {
         </p>
       </section>
       <section className="py-10">
-        <Seasonal dishes={visibleDishes(DISHES, me.role)} ingredients={INGREDIENTS} />
+        <Seasonal dishes={visibleDishes(dishes, me.role)} ingredients={INGREDIENTS} />
       </section>
     </>
   );

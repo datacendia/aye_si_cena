@@ -33,7 +33,9 @@ describe("every phrase exists in both languages", () => {
    * cases are few enough to name.
    */
   it("does not quietly leave English in the Spanish column", () => {
-    const same = ["prices.soles", "bookings.provisional", "admin.spanish"];
+    // Words that really are the same in both. "Plancha" is Spanish that English
+    // kitchens borrowed whole; translating it would be inventing a word.
+    const same = ["prices.soles", "bookings.provisional", "admin.spanish", "take.planchas"];
     const suspect = keys.filter((k) => COPY[k].en === COPY[k].es && !same.includes(k));
     expect(suspect).toEqual([]);
   });

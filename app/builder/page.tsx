@@ -2,12 +2,13 @@ import { fullDishes } from "@/lib/permissions";
 import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import MenuBuilder from "@/components/MenuBuilder";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 
 export const metadata: Metadata = { title: "Build a menu" };
 
 export default async function BuilderPage() {
   const me = await requireCan(CAN.writeQuotes, "build and price a menu");
+  const dishes = await menu(me.locale);
 
   return (
     <>
@@ -22,7 +23,7 @@ export default async function BuilderPage() {
         </p>
       </section>
       <section className="py-10">
-        <MenuBuilder dishes={fullDishes(DISHES, me.role)} />
+        <MenuBuilder dishes={fullDishes(dishes, me.role)} />
       </section>
     </>
   );

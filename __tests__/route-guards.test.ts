@@ -116,11 +116,43 @@ describe("no page hands raw dishes to the browser", () => {
     expect(raw).toEqual([]);
   });
 
+  /**
+   * And no page imports the shipped list at all.
+   *
+   * data/dishes.ts is what shipped; it is not what the menu says. An owner can
+   * rename a dish, reprice it, move its category or withdraw its licence from
+   * the admin screen, and those edits live in the database. A page that imports
+   * DISHES renders last month's menu and looks completely correct doing it.
+   *
+   * lib/repo/menu.ts is the one place that puts the two together — and it
+   * resolves the Spanish at the same time, which is the only reason the admin
+   * screen can insist on a Spanish name and mean it.
+   */
+  it("loads the menu through lib/repo/menu.ts, not from data/dishes.ts", () => {
+    // /admin is the exception, and the only one: it is the screen where a dish
+    // is edited, so it must show what the dish was BEFORE the edit — that is
+    // what goes in the form's placeholder, and it is how the owner sees what
+    // they are changing from. Every other page shows the edited menu.
+    const direct = found
+      .filter((p) => p.route !== "/admin")
+      .filter((p) => /from "@\/data\/dishes"/.test(p.src))
+      .map((p) => p.route || "/");
+    expect(direct).toEqual([]);
+  });
+
+  it("loads it in the reader's language", () => {
+    const wrong = found
+      .filter((p) => /\bmenu\(/.test(p.src))
+      .filter((p) => !/\bmenu\(me\.locale\)/.test(p.src))
+      .map((p) => p.route || "/");
+    expect(wrong).toEqual([]);
+  });
+
   it("actually calls the chokepoint on the pages that render dishes", () => {
     for (const route of ["/find", "/moments", "/graph", "/recipes", "/seasonal"]) {
       const page = found.find((p) => p.route === route);
       expect(page).toBeDefined();
-      expect(page!.src).toMatch(/visibleDishes\(\s*DISHES\s*,\s*me\.role\s*\)/);
+      expect(page!.src).toMatch(/visibleDishes\(\s*dishes\s*,\s*me\.role\s*\)/);
     }
   });
 });

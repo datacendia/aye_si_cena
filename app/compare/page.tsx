@@ -2,12 +2,13 @@ import { fullDishes } from "@/lib/permissions";
 import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import Compare from "@/components/Compare";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 
 export const metadata: Metadata = { title: "Compare tiers" };
 
 export default async function ComparePage() {
   const me = await requireCan(CAN.seeMoney, "see what the money buys");
+  const dishes = await menu(me.locale);
 
   return (
     <>
@@ -21,7 +22,7 @@ export default async function ComparePage() {
         </p>
       </section>
       <section className="py-10">
-        <Compare dishes={fullDishes(DISHES, me.role)} />
+        <Compare dishes={fullDishes(dishes, me.role)} />
       </section>
     </>
   );

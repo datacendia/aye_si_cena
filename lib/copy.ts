@@ -284,7 +284,54 @@ export const COPY: Record<string, Phrase> = {
     es: "Ese enlace venció o ya se usó. Pida otro.", section: "reset" },
   "reset.done": {
     en: "Done. Sign in with the new password.",
-    es: "Listo. Entre con la contraseña nueva.", section: "reset" }
+    es: "Listo. Entre con la contraseña nueva.", section: "reset" },
+
+  /* ── can you do the 14th? ── */
+  "take.heading": { en: "Can you do it?", es: "¿Puede tomarlo?", section: "take" },
+  "take.lede": {
+    en: "Somebody is on the phone with a date. Put it in and find out whether it fits beside what you have already sold that day — before you say yes.",
+    es: "Alguien está al teléfono con una fecha. Póngala y vea si entra junto a lo que ya vendió ese día — antes de decir que sí.",
+    section: "take" },
+  "take.date": { en: "Date", es: "Fecha", section: "take" },
+  "take.guests": { en: "Guests", es: "Invitados", section: "take" },
+  "take.tier": { en: "Tier", es: "Nivel", section: "take" },
+  "take.district": { en: "District", es: "Distrito", section: "take" },
+  "take.venue": { en: "Venue", es: "Local", section: "take" },
+  "take.time": { en: "On the table at", es: "En la mesa a las", section: "take" },
+  "take.hours": { en: "Service runs", es: "El servicio dura", section: "take" },
+  "take.ask": { en: "Ask", es: "Preguntar", section: "take" },
+  "take.yes": { en: "Yes — it fits.", es: "Sí — entra.", section: "take" },
+  "take.no": { en: "No, not as it stands.", es: "No, así no.", section: "take" },
+  "take.against": { en: "checked against", es: "comparado con", section: "take" },
+  "take.alone": {
+    en: "Nothing else is on that day.",
+    es: "No hay nada más ese día.", section: "take" },
+  "take.kit": { en: "What you have", es: "Con lo que cuenta", section: "take" },
+  "take.planchas": { en: "Planchas", es: "Planchas", section: "take" },
+  "take.fryers": { en: "Fryers", es: "Freidoras", section: "take" },
+  "take.ovens": { en: "Ovens", es: "Hornos", section: "take" },
+  "take.vans": { en: "Vans", es: "Camionetas", section: "take" },
+  "take.crew": { en: "Crew", es: "Personal", section: "take" },
+  "take.book": { en: "Put it in the book", es: "Ponerlo en la agenda", section: "take" },
+  "nav.take": { en: "Can you do it?", es: "¿Puede tomarlo?", section: "nav" },
+
+  /* ── price drift ── */
+  "drift.heading": { en: "What is moving", es: "Lo que se está moviendo", section: "drift" },
+  "drift.lede": {
+    en: "Every ingredient you have priced more than once, and what has happened since. A supplier who creeps up 4% a month is invisible one receipt at a time.",
+    es: "Cada ingrediente que ha registrado más de una vez, y lo que ha pasado desde entonces. Un proveedor que sube 4% al mes es invisible boleta por boleta.",
+    section: "drift" },
+  "drift.since": { en: "since", es: "desde", section: "drift" },
+  "drift.readings": { en: "readings", es: "registros", section: "drift" },
+  "drift.settled": {
+    en: "Nothing has moved more than 5%.",
+    es: "Nada se ha movido más de 5%.", section: "drift" },
+  "drift.needTwo": {
+    en: "Price something twice and this page starts answering.",
+    es: "Registre un precio dos veces y esta página empieza a responder.", section: "drift" },
+  "drift.dishes": { en: "dishes carry it", es: "platos lo llevan", section: "drift" },
+  "drift.overEstimate": { en: "over the estimate", es: "sobre el estimado", section: "drift" },
+  "drift.underEstimate": { en: "under the estimate", es: "bajo el estimado", section: "drift" }
 };
 
 /** A phrase book for one render: the defaults, with any saved rows over them. */

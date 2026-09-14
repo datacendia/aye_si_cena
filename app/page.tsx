@@ -1,22 +1,23 @@
 import { requireViewer } from "@/lib/session";
 import Link from "next/link";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 import { TIERS } from "@/lib/pricing";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 
 
 
 export default async function HomePage() {
-  await requireViewer();
+  const me = await requireViewer();
+  const dishes = await menu(me.locale);
 
   // Cheapest food cost with the widest tier reach reads as the strongest sellers.
-  const signatures = [...DISHES]
+  const signatures = [...dishes]
     .filter((d) => d.tiers.length === 3)
     .sort((a, b) => a.cost / a.price - b.cost / b.price)
     .slice(0, 6);
   const counts = CATEGORY_ORDER.map((c) => ({
     label: CATEGORY_LABEL[c],
-    n: DISHES.filter((d) => d.category === c).length
+    n: dishes.filter((d) => d.category === c).length
   }));
 
   return (
@@ -31,7 +32,7 @@ export default async function HomePage() {
         <p className="mt-6 max-w-xl text-lg text-ink-2">
           <span className="text-ink">Aye</span> is Scottish for yes.{" "}
           <span className="text-ink">Sí</span> is Spanish for yes. Say it aloud and it means
-          something else again. {DISHES.length} dishes that take Glasgow technique and run it through the
+          something else again. {dishes.length} dishes that take Glasgow technique and run it through the
           Lima pantry.
         </p>
 
@@ -46,7 +47,7 @@ export default async function HomePage() {
             href="/menu"
             className="rounded-lg border border-line px-5 py-3 text-sm font-bold hover:border-ink-3"
           >
-            Browse all {DISHES.length} dishes
+            Browse all {dishes.length} dishes
           </Link>
         </div>
 

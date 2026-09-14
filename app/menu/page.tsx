@@ -1,6 +1,6 @@
 import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
-import { DISHES } from "@/data/dishes";
+import { menu } from "@/lib/repo/menu";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 import { foodCostRatio, marginFlag, soles } from "@/lib/pricing";
 
@@ -15,7 +15,8 @@ const FLAG_STYLE = {
 } as const;
 
 export default async function MenuPage() {
-  await requireCan(CAN.seeMoney, "see the matrix, which carries every cost and margin");
+  const me = await requireCan(CAN.seeMoney, "see the matrix, which carries every cost and margin");
+  const dishes = await menu(me.locale);
 
   return (
     <>
@@ -36,7 +37,7 @@ export default async function MenuPage() {
       </section>
 
       {CATEGORY_ORDER.map((cat) => {
-        const rows = DISHES.filter((d) => d.category === cat);
+        const rows = dishes.filter((d) => d.category === cat);
         return (
           <section key={cat} className="py-10">
             <div className="mb-4 flex items-baseline gap-3">

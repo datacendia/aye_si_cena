@@ -17,6 +17,9 @@ import { ESTIMATES, type PriceBook } from "@/lib/costing";
 import type { Price } from "@/lib/costing";
 import { CAN, assertCan } from "@/lib/permissions";
 import type { Viewer } from "@/lib/session";
+import { drift, dishesByIngredient, type Drift } from "@/lib/drift";
+import { RECIPES } from "@/data/recipes";
+import { DISHES } from "@/data/dishes";
 
 export interface VerifiedPrice {
   id: string;
@@ -133,4 +136,31 @@ export async function priceHistory(ingredientKey: string) {
   return db.select().from(priceOverrides)
     .where(eq(priceOverrides.ingredientKey, ingredientKey))
     .orderBy(desc(priceOverrides.verifiedAt));
+}
+
+/**
+ * Every price you have recorded more than once, and what has happened since.
+ *
+ * The rows have been accumulating since the first market run — this is the
+ * first thing to read them. One query for the whole table rather than one per
+ * key: there are a few hundred rows at most, and a round trip per ingredient on
+ * a free tier that sleeps is the difference between a page and a wait.
+ */
+export async function priceDrift(): Promise<Drift[]> {
+  const rows = await db.select().from(priceOverrides).orderBy(priceOverrides.verifiedAt);
+
+  const estimates = Object.fromEntries(
+    Object.entries(ESTIMATES.food).map(([k, v]) => [k, v.soles])
+  );
+
+  return drift(
+    rows.map((r) => ({
+      ingredientKey: r.ingredientKey,
+      soles: r.soles,
+      per: r.per,
+      verifiedAt: r.verifiedAt,
+      source: r.source
+    })),
+    { dishesByIngredient: dishesByIngredient(RECIPES, DISHES), estimates }
+  );
 }
