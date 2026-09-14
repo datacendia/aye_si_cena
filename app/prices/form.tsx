@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { savePrice } from "./actions";
 
 function Submit() {
@@ -19,7 +20,7 @@ const field = "rounded-md border border-line bg-surface px-2.5 py-1.5 text-sm fo
 const label = "font-mono text-[10px] uppercase tracking-wider text-ink-3";
 
 export default function PriceForm() {
-  const [error, action] = useFormState(savePrice, undefined);
+  const [error, action] = useActionState(savePrice, undefined);
 
   return (
     <form action={action} className="h-fit rounded-xl border border-line bg-surface p-5">

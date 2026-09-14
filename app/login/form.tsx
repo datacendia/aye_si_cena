@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { login } from "./actions";
 
 function Submit() {
@@ -18,7 +19,7 @@ function Submit() {
 }
 
 export default function LoginForm({ next }: { next: string }) {
-  const [error, action] = useFormState(login, undefined);
+  const [error, action] = useActionState(login, undefined);
 
   return (
     <form action={action} className="mt-7 flex flex-col gap-3">

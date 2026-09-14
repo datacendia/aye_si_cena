@@ -111,9 +111,9 @@ describe("planning a whole month", () => {
       rows.push([m, plan.blocked.length, plan.unreplaceable.length] as const);
     }
     const worst = [...rows].sort((a, b) => b[2] - a[2])[0];
-    // eslint-disable-next-line no-console
+     
     console.log("  month | off menu | no substitute");
-    // eslint-disable-next-line no-console
+     
     for (const [m, b, u] of rows) console.log(`  ${String(m).padStart(5)} | ${String(b).padStart(8)} | ${String(u).padStart(13)}`);
     expect(worst[1]).toBeGreaterThan(0);
   });

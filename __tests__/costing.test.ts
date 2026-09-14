@@ -142,7 +142,7 @@ describe("what the costing says about the matrix", () => {
     // prices are estimates; the gap between them is the finding, and closing
     // it is a market run, not a code change.
     const far = variance.filter((v) => v.ratio !== null && (v.ratio < 0.7 || v.ratio > 1.4));
-    // eslint-disable-next-line no-console
+     
     console.log(
       `  ${far.length} of ${variance.length} dishes are more than 40% away from their ` +
       `costed figure. Bakery is the worst: sugar and flour are cheap and the ` +

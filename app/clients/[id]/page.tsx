@@ -10,9 +10,10 @@ import { soles } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Client" };
 
-export default async function ClientPage({ params }: { params: { id: string } }) {
+export default async function ClientPage({ params }: { params: Promise<{ id: string }> }) {
   const me = await requireViewer();
-  const client = await getClient(me, params.id);
+  const { id } = await params;
+  const client = await getClient(me, id);
   if (!client) notFound();
 
   const quotes = (await listQuotes(me)).filter((q) => q.clientId === client.id);

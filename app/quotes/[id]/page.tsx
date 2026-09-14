@@ -16,9 +16,15 @@ import BookIt from "./book";
 
 export const metadata: Metadata = { title: "Quote" };
 
-export default async function QuotePage({ params }: { params: { id: string } }) {
+/*
+ * `params` is a Promise from Next 15 onwards. Awaiting it is not ceremony: the
+ * router can begin rendering before the segment is resolved, and a page that
+ * reads it synchronously is a page that can render against the wrong id.
+ */
+export default async function QuotePage({ params }: { params: Promise<{ id: string }> }) {
   const me = await requireViewer();
-  const q = await getQuote(me, params.id);
+  const { id } = await params;
+  const q = await getQuote(me, id);
   // Null covers both "no such quote" and "not yours". Telling them apart would
   // let someone count your events by trying ids.
   if (!q) notFound();

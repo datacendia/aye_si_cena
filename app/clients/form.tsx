@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { addClient } from "./actions";
 import { DIETS, DIET_LABEL } from "@/lib/dietary";
 import { DISTRICTS } from "@/data/venues";
@@ -22,7 +23,7 @@ function Submit() {
 }
 
 export default function ClientForm() {
-  const [error, action] = useFormState(addClient, undefined);
+  const [error, action] = useActionState(addClient, undefined);
 
   return (
     <form action={action} className="h-fit rounded-xl border border-line bg-surface p-5">

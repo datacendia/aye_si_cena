@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { bookQuote } from "../actions";
 
 function Submit() {
@@ -23,7 +24,7 @@ function Submit() {
  */
 export default function BookIt({ id, alreadyBooked }: { id: string; alreadyBooked: boolean }) {
   const [open, setOpen] = useState(false);
-  const [error, action] = useFormState(bookQuote.bind(null, id), undefined);
+  const [error, action] = useActionState(bookQuote.bind(null, id), undefined);
 
   if (alreadyBooked) {
     return (

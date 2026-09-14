@@ -13,12 +13,18 @@ import { signIn, signOut } from "@/lib/auth";
 const REFUSED = "That email and password do not match an account.";
 
 export async function login(_prev: string | undefined, form: FormData) {
-  const next = String(form.get("next") || "/");
+  /*
+   * Only ever a path on this site. `startsWith("/")` alone is not enough:
+   * "//evil.pe" is a protocol-relative URL, so it passes that test and lands
+   * the newly signed-in user on somebody else's site.
+   */
+  const raw = String(form.get("next") || "/");
+  const next = raw.startsWith("/") && !raw.startsWith("//") ? raw : "/";
   try {
     await signIn("credentials", {
       email: form.get("email"),
       password: form.get("password"),
-      redirectTo: next.startsWith("/") ? next : "/"
+      redirectTo: next
     });
   } catch (err) {
     // next/navigation signals a redirect by throwing; that is success, not failure.

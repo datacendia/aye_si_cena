@@ -136,7 +136,7 @@ describe("the vedas are law, not seasonality", () => {
   it("counts what each month costs you legally", () => {
     const rows: string[] = [];
     for (let m = 1; m <= 12; m++) rows.push(`${m}:${illegalInMonth(DISHES, RECIPES, VEDAS, m).size}`);
-    // eslint-disable-next-line no-console
+     
     console.log("  dishes illegal by month — " + rows.join(" "));
     expect(rows.length).toBe(12);
   });

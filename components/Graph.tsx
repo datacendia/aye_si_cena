@@ -36,7 +36,14 @@ export default function Graph({ dishes }: { dishes: VisibleDish[] }) {
       // Labels sit outside the ring, pushed along their own radius.
       lx: cx + Math.cos(angle) * (radius + 34),
       ly: cy + Math.sin(angle) * (radius + 34),
-      anchor: Math.cos(angle) > 0.25 ? "start" : Math.cos(angle) < -0.25 ? "end" : "middle"
+      // Annotated, not inferred: React 19's SVG types narrowed textAnchor to
+      // the four values SVG actually accepts, and a widened `string` no longer
+      // fits. The annotation is the honest version of what this always was.
+      anchor: (Math.cos(angle) > 0.25
+        ? "start"
+        : Math.cos(angle) < -0.25
+          ? "end"
+          : "middle") as "start" | "end" | "middle"
     };
   });
 

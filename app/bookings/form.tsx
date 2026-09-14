@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { addBooking } from "./actions";
 import { DISTRICTS, VENUE_TYPES } from "@/data/venues";
 import { TIERS } from "@/lib/pricing";
@@ -22,7 +23,7 @@ function Submit() {
 }
 
 export default function BookingForm({ clients }: { clients: { id: string; name: string }[] }) {
-  const [error, action] = useFormState(addBooking, undefined);
+  const [error, action] = useActionState(addBooking, undefined);
 
   return (
     <form action={action} className="h-fit rounded-xl border border-line bg-surface p-5">

@@ -126,7 +126,7 @@ describe("filtering a menu by diet", () => {
     // Not a gate - a finding. Nine vegan dishes out of 150 is a real gap in
     // the menu, and it should be visible rather than discovered at an event.
     const counts = DIETS.map((d) => `${d} ${dishesFor(DISHES, index, [d]).length}`);
-    // eslint-disable-next-line no-console
+     
     console.log("  " + counts.join(" | "));
     expect(dishesFor(DISHES, index, ["vegan"]).length).toBeGreaterThan(0);
   });

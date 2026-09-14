@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 import { updateCopy, resetCopy } from "./actions";
 
 const field =
@@ -25,7 +26,7 @@ export default function CopyEditor({
   row: { key: string; en: string; es: string; edited: boolean };
   labels: { en: string; es: string; save: string; saved: string; revert: string };
 }) {
-  const [state, action] = useFormState(updateCopy.bind(null, row.key), undefined);
+  const [state, action] = useActionState(updateCopy.bind(null, row.key), undefined);
   const ok = state === "saved";
 
   return (
