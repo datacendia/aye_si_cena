@@ -5,7 +5,18 @@
  * The standalone re-implements the quote maths in vanilla JS; this is what
  * stops the two implementations drifting apart.
  */
-import { chromium } from "/opt/node22/lib/node_modules/playwright/index.mjs";
+/*
+ * Playwright, from wherever it happens to live.
+ *
+ * This was an absolute path into one machine's global node_modules, which
+ * worked on that machine and nowhere else — so the check that guards the
+ * standalone could not run in CI, which is the one place it needs to run
+ * without being asked. Resolved normally first, with the global install as the
+ * fallback for the laptop it was written on.
+ */
+const { chromium } = await import("playwright").catch(() =>
+  import("/opt/node22/lib/node_modules/playwright/index.mjs")
+);
 
 const FILE = process.argv[2];
 if (!FILE) throw new Error("usage: verify-standalone.mjs <path-to-html>");

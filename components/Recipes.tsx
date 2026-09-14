@@ -43,12 +43,15 @@ export default function Recipes({
     <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
       {/* index */}
       <div>
+        <label htmlFor="recipe-search" className="sr-only">
+          Search dish or ingredient
+        </label>
         <input
+          id="recipe-search"
           type="search"
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search dish or ingredient…"
-          aria-label="Search recipes"
           className="mb-4 w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm"
         />
         <p className="mb-3 font-mono text-[11px] text-ink-3">

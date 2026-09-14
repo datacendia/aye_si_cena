@@ -46,20 +46,23 @@ export default function Compare({ dishes }: { dishes: Dish[] }) {
 
   return (
     <div>
-      <fieldset className="mb-8">
-        <legend className="mb-2 font-mono text-[11px] uppercase tracking-wider text-ink-3">
+      <div className="mb-8">
+        <label
+          htmlFor="compare-guests"
+          className="mb-2 block font-mono text-[11px] uppercase tracking-wider text-ink-3"
+        >
           Guests
-        </legend>
+        </label>
         <input
+          id="compare-guests"
           type="number"
           min={1}
           max={500}
           value={guests}
           onChange={(e) => setGuests(Math.max(1, Number(e.target.value) || 1))}
           className="tnum w-32 rounded-lg border border-line bg-surface px-3 py-2 font-mono"
-          aria-label="Number of guests"
         />
-      </fieldset>
+      </div>
 
       <div className="grid gap-4 lg:grid-cols-3">
         {quotes.map(({ tier, quote }) => {

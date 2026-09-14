@@ -1,0 +1,110 @@
+# Every check that used to depend on somebody remembering.
+#
+# The split is deliberate. `checks` is the fast job — typecheck, lint, 600
+# tests and the client-build leak scan — and it needs nothing but Node, so it
+# reports in about two minutes. `standalone` needs a real browser to drive the
+# single-file menu, so it installs Chromium and runs on its own.
+#
+# `client-build` is the job that matters most and is easiest to overlook: it
+# builds the file you send a client and then reads the bytes for costs,
+# suppliers and quantities. It is the check that caught supplier names leaking
+# through the Spanish dictionary after the English had been stripped out.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Typecheck, lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      # PGlite runs Postgres in WebAssembly, so there is no service container
+      # here on purpose: lib/repo is tested against real SQL with nothing to
+      # start up and nothing to wait for.
+
+      - name: Build
+        run: npm run build
+        env:
+          # The app builds without a database — db/index.ts falls back to a
+          # placeholder URL so nothing connects at build time. A build that
+          # needed a real Neon connection would make CI depend on a free-tier
+          # database waking up.
+          AUTH_SECRET: build-only-not-a-real-secret
+
+      - name: The file you send a client has nothing in it
+        run: npm run standalone:client
+
+  audit:
+    name: Dependency advisories
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+
+      # Gated at high, not at moderate. The moderates outstanding are
+      # drizzle-kit's transitive esbuild dev-server advisory: drizzle-kit never
+      # starts that server, it is a developer CLI that never ships, and the
+      # only "fix" npm offers is drizzle-kit 0.18.1 — thirteen minor versions
+      # back and unable to read db/migrations. Failing the build on it would
+      # teach everyone to ignore this job.
+      - name: No high or critical advisories
+        run: npm audit --audit-level=high
+
+  standalone:
+    name: The single file, in a real browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # playwright is a devDependency (pinned with ~ so the browser build it
+      # expects stays stable) so the import resolves from node_modules; this
+      # downloads the browser binary it drives.
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # Builds standalone.html, then drives it: 223 dish rows, the quote maths
+      # against lib/pricing.ts, the vedas, the 15 diet filters, the Spanish
+      # coverage per pane, and no sideways scroll at 390px.
+      - name: Verify
+        run: npm run verify:standalone
