@@ -83,6 +83,70 @@ jobs:
       - name: No high or critical advisories
         run: npm audit --audit-level=high
 
+  app:
+    name: The app itself, in a real browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    # The unit tests cover lib/ and lib/repo/, and the standalone job covers the
+    # single file. Between them sat the part nobody was checking: the pages,
+    # where a server action meets a form. Every failure the verifier found on
+    # its first run was invisible from reading the code — repeated checkboxes
+    # collapsing to one, an empty number box parsed as zero, three pages
+    # scrolling sideways at 390px.
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ayesicena
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+        ports:
+          - 5432:5432
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ayesicena
+      AUTH_SECRET: ci-only-not-a-real-secret
+      AUTH_URL: http://localhost:3300
+      AUTH_TRUST_HOST: "1"
+      APP_URL: http://localhost:3300
+      VERIFY_EMAIL: ci@ayesicena.pe
+      VERIFY_PASSWORD: a-very-long-ci-password
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Schema and an owner to sign in as
+        run: |
+          npx drizzle-kit migrate
+          printf '%s\n' "$VERIFY_PASSWORD" | npm run user:create -- owner "$VERIFY_EMAIL" CI
+
+      - name: Build and start
+        run: |
+          npm run build
+          npx next start -p 3300 &
+          npx wait-on --timeout 60000 http://localhost:3300/login
+
+      # Signs in, drives the menu proposer, the engineering matrix, the price
+      # drift, the day check and the admin — and checks that a dish edit
+      # actually reaches another page, in both languages.
+      - name: Verify
+        run: npm run verify:app
+
   standalone:
     name: The single file, in a real browser
     runs-on: ubuntu-latest

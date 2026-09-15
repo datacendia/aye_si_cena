@@ -25,7 +25,8 @@
     "market-run": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs",
     "market-run:es": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs --lang es",
     "backup": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/backup.mjs",
-    "restore": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/restore.mjs"
+    "restore": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/restore.mjs",
+    "verify:app": "node scripts/verify-app.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",
@@ -62,6 +63,7 @@
     "tailwindcss": "3.4.7",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
-    "typescript": "5.5.4"
+    "typescript": "5.5.4",
+    "wait-on": "^9.1.0"
   }
 }

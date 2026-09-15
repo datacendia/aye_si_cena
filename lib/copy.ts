@@ -357,7 +357,35 @@ export const COPY: Record<string, Phrase> = {
   "eng.neverQuotedLede": {
     en: "Not dogs. Nobody has put these in front of a client yet, which is a different sentence entirely — and a menu decision taken on the wrong one removes a dish that was never given a chance.",
     es: "No son perros. Nadie los ha puesto delante de un cliente todavía, que es una frase completamente distinta — y una decisión tomada sobre la equivocada quita un plato que nunca tuvo oportunidad.",
-    section: "eng" }
+    section: "eng" },
+
+  /* ── the menu that proposes itself ── */
+  "nav.propose": { en: "Propose a menu", es: "Proponer un menú", section: "nav" },
+  "propose.heading": { en: "Propose a menu", es: "Proponer un menú", section: "propose" },
+  "propose.lede": {
+    en: "Six questions at once, which is what you ask yourself when somebody rings. Legal to sell this month, in season, inside the food-cost target, safe for this client, cookable with the kit you own, and Scottish above half.",
+    es: "Seis preguntas a la vez, que es lo que uno se pregunta cuando alguien llama. Legal de vender este mes, de temporada, dentro del costo objetivo, seguro para este cliente, cocinable con el equipo que tiene, y escocés más de la mitad.",
+    section: "propose" },
+  "propose.month": { en: "Month", es: "Mes", section: "propose" },
+  "propose.client": { en: "Client", es: "Cliente", section: "propose" },
+  "propose.noClient": { en: "Nobody in particular", es: "Nadie en particular", section: "propose" },
+  "propose.dishes": { en: "Dishes", es: "Platos", section: "propose" },
+  "propose.kit": { en: "Kit on the day", es: "Equipo del día", section: "propose" },
+  "propose.go": { en: "Propose", es: "Proponer", section: "propose" },
+  "propose.why": { en: "Why each one is here", es: "Por qué está cada uno", section: "propose" },
+  "propose.rejected": { en: "What the month took away", es: "Lo que se llevó el mes", section: "propose" },
+  "propose.rejectedLede": {
+    en: "Shown as prominently as the menu. A proposal that cannot say what it ruled out is worth nothing to somebody about to send it to a client.",
+    es: "Se muestra tan visible como el menú. Una propuesta que no puede decir qué descartó no sirve de nada a quien está por enviarla a un cliente.",
+    section: "propose" },
+  "propose.british": { en: "British", es: "británico", section: "propose" },
+  "propose.draft": {
+    en: "A first draft by something that has read all 223. You still sign it.",
+    es: "Un primer borrador de algo que ha leído los 223. Usted sigue firmándolo.",
+    section: "propose" },
+  "propose.diets": { en: "Diets on record", es: "Dietas registradas", section: "propose" },
+  "propose.foodCost": { en: "food cost", es: "costo", section: "propose" },
+  "propose.perGuest": { en: "per guest, ex-IGV", es: "por invitado, sin IGV", section: "propose" }
 };
 
 /** A phrase book for one render: the defaults, with any saved rows over them. */

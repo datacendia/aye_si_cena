@@ -3,6 +3,27 @@
 @tailwind utilities;
 
 /*
+  Grid and flex children may shrink below their content.
+
+  The default is `min-width: auto`, which means a grid item refuses to be
+  narrower than its own min-content — so a table with a min-width inside an
+  `overflow-x-auto` box does not scroll inside that box. It pushes the grid
+  track wider, the track pushes the page wider, and the whole document scrolls
+  sideways on a phone while every individual rule looks right.
+
+  Three pages had this at 390px and it had never been visible on a laptop.
+  Setting it once here is better than a `min-w-0` that has to be remembered on
+  every new two-column layout; the `overflow-x-auto` containers then actually
+  do their job.
+*/
+@layer base {
+  .grid > *,
+  .flex > * {
+    min-width: 0;
+  }
+}
+
+/*
   Light is the default set; dark is redefined at token level only, so no colour
   is ever declared solely inside a media query.
 */

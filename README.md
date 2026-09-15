@@ -297,6 +297,31 @@ The counters live in a table rather than in memory because the app runs in
 Netlify functions, where each request may be a fresh process and an in-memory
 counter would reset itself and protect nothing.
 
+### Checking it
+
+```
+npm run validate           # typecheck, lint, 748 tests
+npm run verify:standalone  # the single file, driven in Chromium
+npm run standalone:client  # the client file, read byte by byte for leaks
+npm run verify:app         # the app itself, signed in, in Chromium
+```
+
+`verify:app` needs the app running and an owner to sign in as:
+
+```
+export DATABASE_URL=… AUTH_SECRET=… AUTH_URL=http://localhost:3300
+npm run db:migrate && npm run user:create owner you@example.com "You"
+npm run build && npx next start -p 3300 &
+VERIFY_EMAIL=you@example.com VERIFY_PASSWORD=… npm run verify:app
+```
+
+It exists because the unit tests cover `lib/` and the standalone verifier covers
+the single file, and between them sat the pages themselves — where a server
+action meets a form. Everything it found on its first run was invisible from
+reading the code: five ticked checkboxes arriving as one, an untouched price box
+parsed as zero and refusing a rename, a licence flag that could be switched on
+and never off, and three pages scrolling sideways at 390px.
+
 ### Backups
 
 Neon's free tier has no point-in-time recovery, and there is no `pg_dump` in a

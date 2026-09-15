@@ -107,6 +107,13 @@ export default function DishEditor({ row, categories, labels }: {
               </select>
             </label>
             <label className="flex items-center gap-2 pt-5">
+              {/*
+                * The hidden field sends "false" when the box is unticked. Without
+                * it an unticked box sends nothing, which is the same thing the
+                * form sends for "I did not touch this" — so the licence could be
+                * switched on and never off again.
+                */}
+              <input type="hidden" name="needsLicence" value="false" />
               <input name="needsLicence" type="checkbox" value="true"
                 defaultChecked={e?.needsLicence ?? row.needsLicence} />
               <span className="text-sm text-ink-2">giro especial</span>

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { DishForm } from "@/lib/forms";
 import { requireViewer } from "@/lib/session";
 import { saveCopy, revertCopy, saveDishEdit, revertDish } from "@/lib/repo/copy";
 import { issueReset, setActive } from "@/lib/repo/passwords";
@@ -29,15 +30,7 @@ export async function resetCopy(key: string) {
   revalidatePath("/", "layout");
 }
 
-const DishForm = z.object({
-  name: z.string().max(160).nullish(),
-  nameEs: z.string().max(160).nullish(),
-  fusion: z.string().max(1200).nullish(),
-  fusionEs: z.string().max(1200).nullish(),
-  price: z.coerce.number().nullish().or(z.literal("").transform(() => null)),
-  category: z.string().max(40).nullish(),
-  needsLicence: z.coerce.boolean().nullish()
-});
+
 
 export async function updateDish(dishId: number, _prev: string | undefined, form: FormData) {
   const me = await requireViewer();
