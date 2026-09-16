@@ -3,12 +3,23 @@ import Link from "next/link";
 import { menu } from "@/lib/repo/menu";
 import { TIERS } from "@/lib/pricing";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
+import { loadCopy, categoryLabel } from "@/lib/copy";
 
 
 
-export default async function HomePage() {
+export const metadata = { title: "Panel" };
+
+/**
+ * Where staff land.
+ *
+ * This used to be `/`, and `/` is now the shop window — because the front door
+ * of a catering business has to be something a customer can open. Anyone signed
+ * in is redirected here from `/`, so nobody has to know the URL changed.
+ */
+export default async function PanelPage() {
   const me = await requireViewer();
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
 
   // Cheapest food cost with the widest tier reach reads as the strongest sellers.
   const signatures = [...dishes]
@@ -16,7 +27,7 @@ export default async function HomePage() {
     .sort((a, b) => a.cost / a.price - b.cost / b.price)
     .slice(0, 6);
   const counts = CATEGORY_ORDER.map((c) => ({
-    label: CATEGORY_LABEL[c],
+    label: categoryLabel(t, c, CATEGORY_LABEL[c]),
     n: dishes.filter((d) => d.category === c).length
   }));
 

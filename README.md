@@ -297,10 +297,34 @@ The counters live in a table rather than in memory because the app runs in
 Netlify functions, where each request may be a fresh process and an in-memory
 counter would reset itself and protect nothing.
 
+### Who can see what
+
+There are two sites here, on one deployment.
+
+**The shop window** — `/`, `/carta`, `/paquetes`, `/eventos` — is open to
+anybody. It carries the 223 dishes with their allergens and diets, three
+packages with a per-guest figure to start from, and a WhatsApp link. It carries
+no cost, no supplier, no margin, no recipe and no per-dish price.
+
+**Everything else** is behind the login: the matrix, the recipes, the quotes,
+the clients, the bookings, the verified prices, the admin. Signing in lands you
+on `/panel`.
+
+The separation is structural rather than remembered. Public pages read
+`lib/public.ts`, which builds each dish by **picking** fields from a whitelist
+rather than dropping the sensitive ones — so a field added to `Dish` next spring
+reaches the internet only when somebody puts it on that list on purpose, in a
+commit somebody reviews. `__tests__/public.test.ts` fails the moment `Dish`
+grows a field nobody has classified, and `npm run verify:app` opens each public
+page with no cookie at all and reads the bytes for supplier names and cost
+figures.
+
+Set `NEXT_PUBLIC_WHATSAPP` to your number, digits only, international form.
+
 ### Checking it
 
 ```
-npm run validate           # typecheck, lint, 748 tests
+npm run validate           # typecheck, lint, 770 tests
 npm run verify:standalone  # the single file, driven in Chromium
 npm run standalone:client  # the client file, read byte by byte for leaks
 npm run verify:app         # the app itself, signed in, in Chromium

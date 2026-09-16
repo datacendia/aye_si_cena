@@ -6,6 +6,7 @@ import { getClient } from "@/lib/repo/clients";
 import { listQuotes } from "@/lib/repo/quotes";
 import { CAN } from "@/lib/permissions";
 import { DIET_LABEL, DIET_NOTE, type Diet } from "@/lib/dietary";
+import { loadCopy, dietLabel } from "@/lib/copy";
 import { soles } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "Client" };
@@ -14,6 +15,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
   const me = await requireViewer();
   const { id } = await params;
   const client = await getClient(me, id);
+  const t = await loadCopy(me.locale);
   if (!client) notFound();
 
   const quotes = (await listQuotes(me)).filter((q) => q.clientId === client.id);
@@ -79,7 +81,7 @@ export default async function ClientPage({ params }: { params: Promise<{ id: str
                     className="rounded border border-thistle px-1.5 py-0.5 font-mono
                                text-[10px] uppercase tracking-wider text-thistle"
                   >
-                    {DIET_LABEL[d as Diet] ?? d}
+                    {dietLabel(t, d, DIET_LABEL[d as Diet] ?? d)}
                   </span>
                   <p className="mt-1.5 text-xs text-ink-2">{DIET_NOTE[d as Diet]}</p>
                 </li>

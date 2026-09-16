@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import SaveQuote from "./SaveQuote";
 import type { Dish, ServiceTier } from "@/lib/dishes";
-import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
+import { CATEGORY_ORDER } from "@/lib/dishes";
 import { buildQuote, TIERS, soles, marginFlag } from "@/lib/pricing";
 import { findConflicts } from "@/lib/conflicts";
 import { buildRunSheet } from "@/lib/runsheet";
@@ -11,7 +11,9 @@ import { DISTRICTS, VENUE_TYPES } from "@/data/venues";
 
 
 
-export default function MenuBuilder({ dishes }: { dishes: Dish[] }) {
+export default function MenuBuilder(
+  { dishes, categories }: { dishes: Dish[]; categories: Record<string, string> }
+) {
   const [tier, setTier] = useState<ServiceTier>("plated");
   const [guests, setGuests] = useState(20);
   const [picked, setPicked] = useState<number[]>([1, 2, 20, 76]);
@@ -184,7 +186,7 @@ export default function MenuBuilder({ dishes }: { dishes: Dish[] }) {
           return (
             <section key={cat} className="mb-8">
               <h3 className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-3">
-                {CATEGORY_LABEL[cat]}
+                {categories[cat] ?? cat}
               </h3>
               <div className="grid gap-2 sm:grid-cols-2">
                 {rows.map((d) => {

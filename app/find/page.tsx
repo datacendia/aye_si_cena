@@ -3,6 +3,8 @@ import { requireViewer } from "@/lib/session";
 import type { Metadata } from "next";
 import Finder from "@/components/Finder";
 import { menu } from "@/lib/repo/menu";
+import { loadCopy, categoryLabel } from "@/lib/copy";
+import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 import { EVENTS } from "@/data/events";
 import { FLAVOURS } from "@/data/flavours";
 
@@ -11,6 +13,11 @@ export const metadata: Metadata = { title: "Find dishes" };
 export default async function FindPage() {
   const me = await requireViewer();
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
+  const categories = Object.fromEntries(
+    CATEGORY_ORDER.map((c) => [c, categoryLabel(t, c, CATEGORY_LABEL[c])])
+  );
+
 
   return (
     <>
@@ -24,7 +31,7 @@ export default async function FindPage() {
         </p>
       </section>
       <section className="py-10">
-        <Finder dishes={visibleDishes(dishes, me.role)} events={EVENTS} flavours={FLAVOURS} />
+        <Finder categories={categories} dishes={visibleDishes(dishes, me.role)} events={EVENTS} flavours={FLAVOURS} />
       </section>
     </>
   );

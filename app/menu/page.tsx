@@ -2,6 +2,7 @@ import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import { menu } from "@/lib/repo/menu";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
+import { loadCopy, categoryLabel } from "@/lib/copy";
 import { foodCostRatio, marginFlag, soles } from "@/lib/pricing";
 
 export const metadata: Metadata = { title: "The matrix" };
@@ -17,6 +18,7 @@ const FLAG_STYLE = {
 export default async function MenuPage() {
   const me = await requireCan(CAN.seeMoney, "see the matrix, which carries every cost and margin");
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
 
   return (
     <>
@@ -42,7 +44,7 @@ export default async function MenuPage() {
           <section key={cat} className="py-10">
             <div className="mb-4 flex items-baseline gap-3">
               <h2 className="font-display text-2xl font-semibold tracking-tight">
-                {CATEGORY_LABEL[cat]}
+                {categoryLabel(t, cat, CATEGORY_LABEL[cat])}
               </h2>
               <span className="rounded-full border border-line px-2 py-0.5 font-mono text-[11px] text-ink-3">
                 {rows.length}

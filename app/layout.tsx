@@ -4,6 +4,8 @@ import { viewer } from "@/lib/session";
 import { CAN } from "@/lib/permissions";
 import { logout } from "./login/actions";
 import { setLocale } from "./admin/actions";
+import { setPublicLocale } from "./(public)/actions";
+import { publicLocale } from "@/lib/public-locale";
 import { loadCopy } from "@/lib/copy";
 import type { Role } from "@/db/schema";
 import { Fraunces, Karla, IBM_Plex_Mono } from "next/font/google";
@@ -43,7 +45,7 @@ export const metadata: Metadata = {
  * checks again on the server.
  */
 const NAV: { href: string; key: string; needs?: (r: Role) => boolean }[] = [
-  { href: "/", key: "nav.home" },
+  { href: "/panel", key: "nav.home" },
   { href: "/moments", key: "nav.moments" },
   { href: "/find", key: "nav.find" },
   { href: "/menu", key: "nav.menu", needs: CAN.seeMoney },
@@ -64,13 +66,29 @@ const NAV: { href: string; key: string; needs?: (r: Role) => boolean }[] = [
   { href: "/account", key: "nav.account" }
 ];
 
+/**
+ * What a stranger sees in the header.
+ *
+ * Kept separate from NAV rather than filtered out of it. NAV is the staff's
+ * working set and most of it leads to cost, margin and recipes — a public list
+ * derived by subtraction is one careless `needs` away from linking a customer
+ * at the matrix.
+ */
+const PUBLIC_NAV = [
+  { href: "/carta", key: "pub.navMenu" },
+  { href: "/paquetes", key: "pub.navPackages" },
+  { href: "/eventos", key: "pub.navEvents" }
+];
+
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const me = await viewer();
-  const links = me ? NAV.filter((n) => !n.needs || n.needs(me.role)) : [];
-  const t = await loadCopy(me?.locale ?? "es");
+  const links = me ? NAV.filter((n) => !n.needs || n.needs(me.role)) : PUBLIC_NAV;
+  // A stranger has no user row, so their language lives in a cookie.
+  const locale = me?.locale ?? (await publicLocale());
+  const t = await loadCopy(locale);
 
   return (
-    <html lang={me?.locale ?? "es"} className={`${display.variable} ${body.variable} ${mono.variable}`}>
+    <html lang={locale} className={`${display.variable} ${body.variable} ${mono.variable}`}>
       <body className="font-sans">
         <header className="border-b border-line">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-5 py-4">
@@ -83,6 +101,26 @@ export default async function RootLayout({ children }: { children: React.ReactNo
                   {t(n.key)}
                 </Link>
               ))}
+              {!me && (
+                <>
+                <form
+                  action={setPublicLocale.bind(null, locale === "es" ? "en" : "es")}
+                  className="flex items-center"
+                >
+                  <button
+                    type="submit"
+                    className="font-mono text-[11px] uppercase tracking-wider text-ink-3
+                               hover:text-ink"
+                    title={locale === "es" ? "Read this in English" : "Léalo en español"}
+                  >
+                    {locale === "es" ? "EN" : "ES"}
+                  </button>
+                </form>
+                <Link href="/login" className="text-ink-3 hover:text-ink">
+                  {t("pub.navSignIn")}
+                </Link>
+                </>
+              )}
               {me && (
                 <>
                 <form

@@ -7,6 +7,7 @@ import { CAN, visibleDishes } from "@/lib/permissions";
 import { soles, TIERS, IGV_RATE } from "@/lib/pricing";
 import { menu } from "@/lib/repo/menu";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
+import { loadCopy, categoryLabel } from "@/lib/copy";
 import { markQuote, removeQuote } from "../actions";
 import { getClient, dietClashes } from "@/lib/repo/clients";
 import { QUOTE_STATUS } from "@/db/schema";
@@ -24,6 +25,7 @@ export const metadata: Metadata = { title: "Quote" };
 export default async function QuotePage({ params }: { params: Promise<{ id: string }> }) {
   const me = await requireViewer();
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
   const { id } = await params;
   const q = await getQuote(me, id);
   // Null covers both "no such quote" and "not yours". Telling them apart would
@@ -99,7 +101,7 @@ export default async function QuotePage({ params }: { params: Promise<{ id: stri
           {byCategory.map((g) => (
             <div key={g.cat} className="mt-6">
               <h3 className="font-mono text-[11px] uppercase tracking-wider text-ink-3">
-                {CATEGORY_LABEL[g.cat]} · {g.rows.length}
+                {categoryLabel(t, g.cat, CATEGORY_LABEL[g.cat])} · {g.rows.length}
               </h3>
               <ul className="mt-2 divide-y divide-line/60">
                 {g.rows.map((d) => (

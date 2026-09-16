@@ -10,6 +10,21 @@ A Next.js app and a single-file HTML menu, built from one spreadsheet.
 event in Lima — IGV at 18%, transport by district and hour, the liquor
 *giro especial*, and the *vedas*, the legal closed seasons for fish.
 
+## Who can see what
+
+`/`, `/carta`, `/paquetes`, `/eventos` are public. Everything else needs a
+login; signing in lands on `/panel`.
+
+Public pages read `lib/public.ts` and nothing else — never `data/dishes.ts`,
+never `lib/repo/*`. It builds each dish by **picking** from `PUBLIC_DISH_FIELDS`
+rather than dropping `cost`/`source`/`price`, because a blacklist leaks the day
+somebody adds a field. A test fails when `Dish` grows a field nobody has
+classified as public or never-public.
+
+`middleware.ts` is the outer gate and is deny-by-default. Its public list and
+`app/(public)/` must agree — a test checks both directions, because a public
+page the gate blocks is invisible and a gate entry with no page is an open door.
+
 ## Two front ends, one source
 
 - `app/` — the server app. Logins, quotes, clients, bookings, verified
@@ -59,7 +74,8 @@ history was found by measuring, not by reading.
 ## Commands
 
 ```
-npm run validate           # typecheck + lint + 600 tests — run before every commit
+npm run validate           # typecheck + lint + 770 tests — run before every commit
+npm run verify:app         # the app in a browser, signed in AND signed out
 npm run verify:standalone  # build the single file and drive it in a browser
 npm run standalone:client  # build the client-safe file and read it for leaks
 npm run import-matrix      # spreadsheet → data/ (then derive-allergens)

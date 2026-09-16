@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import type { Dish, EventType, Flavour, ServiceFormat } from "@/lib/dishes";
 import type { VisibleDish } from "@/lib/permissions";
 import {
-  CATEGORY_LABEL,
   CATEGORY_ORDER,
   FLAVOUR_AXES,
   FORMAT_LABEL,
@@ -14,11 +13,19 @@ import { soles } from "@/lib/pricing";
 
 interface Props {
   dishes: VisibleDish[];
+  /**
+   * Category names, already in the reader's language.
+   *
+   * Resolved on the server and handed over, because the copy book is a database
+   * read and a client component cannot do one. Shipping the whole book to the
+   * browser to translate seven words would be a strange trade.
+   */
+  categories: Record<string, string>;
   events: EventType[];
   flavours: Record<number, Flavour[]>;
 }
 
-export default function Finder({ dishes, events, flavours }: Props) {
+export default function Finder({ dishes, events, flavours, categories }: Props) {
   const [eventId, setEventId] = useState<string | null>(null);
   const [picked, setPicked] = useState<Flavour[]>([]);
   /** "any" widens as you add flavours; "all" narrows. */
@@ -212,7 +219,7 @@ export default function Finder({ dishes, events, flavours }: Props) {
           .map((cat) => (
             <section key={cat} className="mb-8">
               <h3 className="mb-3 font-mono text-[11px] uppercase tracking-wider text-ink-3">
-                {CATEGORY_LABEL[cat as keyof typeof CATEGORY_LABEL]} · {grouped[cat].length}
+                {categories[cat] ?? cat} · {grouped[cat].length}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {grouped[cat].map((d) => (

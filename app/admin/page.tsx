@@ -6,6 +6,7 @@ import { listLogins } from "@/lib/repo/passwords";
 import { listDishEdits } from "@/lib/repo/copy";
 import { DISHES } from "@/data/dishes";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
+import { categoryLabel } from "@/lib/copy";
 import CopyEditor from "./copy-editor";
 import DishEditor from "./dish-editor";
 import Logins from "./logins";
@@ -88,7 +89,7 @@ export default async function AdminPage() {
                     }
                   : null
               }}
-              categories={CATEGORY_ORDER.map((c) => ({ id: c, label: CATEGORY_LABEL[c] }))}
+              categories={CATEGORY_ORDER.map((c) => ({ id: c, label: categoryLabel(t, c, CATEGORY_LABEL[c]) }))}
               labels={{
                 en: t("admin.english"), es: t("admin.spanish"),
                 save: t("admin.save"), saved: t("admin.saved"),

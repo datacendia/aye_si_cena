@@ -3,14 +3,16 @@
 import { useMemo, useState } from "react";
 import type { Dish, Recipe } from "@/lib/dishes";
 import type { KitchenDish } from "@/lib/permissions";
-import { CATEGORY_LABEL, FORMAT_LABEL } from "@/lib/dishes";
+import { FORMAT_LABEL } from "@/lib/dishes";
 
 export default function Recipes({
   dishes,
-  recipes
+  recipes,
+  categories
 }: {
   dishes: KitchenDish[];
   recipes: Recipe[];
+  categories: Record<string, string>;
 }) {
   const byId = useMemo(() => new Map(dishes.map((d) => [d.id, d])), [dishes]);
   const written = useMemo(
@@ -91,7 +93,7 @@ export default function Recipes({
         <article>
           <header className="border-b border-line pb-5">
             <p className="font-mono text-[11px] uppercase tracking-wider text-ink-3">
-              {CATEGORY_LABEL[openDish.category]} · {FORMAT_LABEL[openDish.format]} ·{" "}
+              {categories[openDish.category] ?? openDish.category} · {FORMAT_LABEL[openDish.format]} ·{" "}
               {openDish.subOrigin}
             </p>
             <h2 className="mt-1.5 font-display text-3xl font-semibold tracking-tight">

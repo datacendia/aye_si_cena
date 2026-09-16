@@ -32,7 +32,7 @@ export interface Phrase {
  */
 export const COPY: Record<string, Phrase> = {
   // ---- chrome ----
-  "nav.home": { en: "Home", es: "Inicio", section: "nav" },
+  "nav.home": { en: "Panel", es: "Panel", section: "nav" },
   "nav.moments": { en: "The evening", es: "La noche", section: "nav" },
   "nav.find": { en: "Find dishes", es: "Buscar platos", section: "nav" },
   "nav.menu": { en: "The matrix", es: "La matriz", section: "nav" },
@@ -385,7 +385,139 @@ export const COPY: Record<string, Phrase> = {
     section: "propose" },
   "propose.diets": { en: "Diets on record", es: "Dietas registradas", section: "propose" },
   "propose.foodCost": { en: "food cost", es: "costo", section: "propose" },
-  "propose.perGuest": { en: "per guest, ex-IGV", es: "por invitado, sin IGV", section: "propose" }
+  "propose.perGuest": { en: "per guest, ex-IGV", es: "por invitado, sin IGV", section: "propose" },
+
+  /* ───────────── the shop window: everything a stranger sees ───────────── */
+
+  "pub.navMenu": { en: "The menu", es: "La carta", section: "public" },
+  "pub.navPackages": { en: "Packages", es: "Paquetes", section: "public" },
+  "pub.navEvents": { en: "Events", es: "Eventos", section: "public" },
+  "pub.navSignIn": { en: "Sign in", es: "Entrar", section: "public" },
+
+  "pub.tagline": {
+    en: "Scottish-Peruvian catering · Lima",
+    es: "Catering escocés-peruano · Lima", section: "public" },
+  "pub.hero": {
+    en: "Aye is Scottish for yes. Sí is Spanish for yes. Say it aloud and it means something else again.",
+    es: "Aye es «sí» en escocés. Sí es «sí» en español. Dígalo en voz alta y significa otra cosa.",
+    section: "public" },
+  "pub.heroLede": {
+    en: "Glasgow technique, run through the Lima pantry. Canapés, buffets and plated dinners for events anywhere in Lima.",
+    es: "Técnica de Glasgow, hecha con la despensa limeña. Canapés, bufés y cenas montadas para eventos en toda Lima.",
+    section: "public" },
+  "pub.seeMenu": { en: "See the menu", es: "Ver la carta", section: "public" },
+  "pub.seePackages": { en: "What it costs", es: "Cuánto cuesta", section: "public" },
+  "pub.whatsapp": { en: "Ask on WhatsApp", es: "Preguntar por WhatsApp", section: "public" },
+  "pub.dishes": { en: "dishes", es: "platos", section: "public" },
+
+  "pub.menuHeading": { en: "The menu", es: "La carta", section: "public" },
+  "pub.menuLede": {
+    en: "Every dish, with what is in it and who can eat it. Filter by the diet you need to cater for — the answer comes from the recipe itself, not from a label somebody typed.",
+    es: "Cada plato, con lo que lleva y quién puede comerlo. Filtre por la dieta que necesita — la respuesta sale de la receta misma, no de una etiqueta que alguien escribió.",
+    section: "public" },
+  "pub.menuPricesNote": {
+    en: "Prices are quoted per event, not per dish — the district, the hour and the number of guests all move them. The packages page has a per-guest figure to start from.",
+    es: "Los precios se cotizan por evento, no por plato — el distrito, la hora y el número de invitados los mueven. En paquetes hay una cifra por invitado para empezar.",
+    section: "public" },
+
+  "pub.pkgHeading": { en: "What it costs", es: "Cuánto cuesta", section: "public" },
+  "pub.pkgLede": {
+    en: "Three levels of service from one kitchen. The figures below include IGV and are where a quote starts — the final number depends on the menu, the district, the hour and the guest count.",
+    es: "Tres niveles de servicio desde una sola cocina. Las cifras incluyen IGV y son el punto de partida — el número final depende del menú, el distrito, la hora y la cantidad de invitados.",
+    section: "public" },
+  "pub.pkgFrom": { en: "from", es: "desde", section: "public" },
+  "pub.pkgPerGuest": { en: "per guest, IGV included", es: "por invitado, IGV incluido", section: "public" },
+  "pub.pkgMinimum": { en: "Minimum", es: "Mínimo", section: "public" },
+  "pub.pkgGuests": { en: "guests", es: "invitados", section: "public" },
+  "pub.pkgAvailable": { en: "dishes at this tier", es: "platos en este nivel", section: "public" },
+  "pub.pkgLicence": {
+    en: "Selling alcohol at your event needs the giro especial. Cooking with it does not — ask and we will tell you which yours is.",
+    es: "Vender alcohol en su evento requiere el giro especial. Cocinar con alcohol no — pregúntenos y le decimos cuál es su caso.",
+    section: "public" },
+
+  "pub.eventsHeading": { en: "By the moment", es: "Por el momento", section: "public" },
+  "pub.eventsLede": {
+    en: "An arrival canapé and a late-night bite are not the same job. Pick the moment and see what actually works for it — one hand holding a drink, no cutlery, off a tray, at midnight.",
+    es: "Un canapé de bienvenida y un bocado de medianoche no son el mismo trabajo. Elija el momento y vea qué funciona de verdad — con una mano ocupada, sin cubiertos, en bandeja, a medianoche.",
+    section: "public" },
+
+  "pub.allergens": { en: "Allergies and diets", es: "Alergias y dietas", section: "public" },
+  "pub.allergensLede": {
+    en: "Every allergen shown on this site is read off the recipe by the same engine that prints the kitchen's own sheets. It is not a legal allergen audit — tell us what you need and we will confirm it in writing before the date.",
+    es: "Cada alérgeno de este sitio se lee de la receta con el mismo motor que imprime las hojas de la cocina. No es una auditoría legal de alérgenos — dígannos qué necesitan y lo confirmamos por escrito antes de la fecha.",
+    section: "public" },
+  "pub.contact": { en: "Ask us", es: "Escríbanos", section: "public" },
+  "pub.contactLede": {
+    en: "Tell us the date, the district and roughly how many. We will come back with a menu and a number.",
+    es: "Díganos la fecha, el distrito y más o menos cuántos. Le respondemos con un menú y un precio.",
+    section: "public" },
+  "pub.search": { en: "Search", es: "Buscar", section: "public" },
+  "pub.searchHint": {
+    en: "a dish, an ingredient, a hometown…",
+    es: "un plato, un ingrediente, un origen…", section: "public" },
+  "pub.of": { en: "of", es: "de", section: "public" },
+  "pub.course": { en: "Course", es: "Tiempo", section: "public" },
+  "pub.diets": { en: "Diets", es: "Dietas", section: "public" },
+  "pub.clear": { en: "Clear all", es: "Limpiar todo", section: "public" },
+  "pub.nothing": {
+    en: "Nothing matches all of that. Loosen one filter — or ask us, because a dish can usually be adapted.",
+    es: "Nada coincide con todo eso. Suelte un filtro — o pregúntenos, porque casi siempre se puede adaptar un plato.",
+    section: "public" },
+  "pub.contains": { en: "Contains", es: "Contiene", section: "public" },
+  "pub.noneDeclarable": {
+    en: "None of the 14 declarable allergens",
+    es: "Ninguno de los 14 alérgenos declarables", section: "public" },
+  "pub.licence": { en: "Alcohol — licence applies", es: "Alcohol — aplica licencia", section: "public" },
+
+
+  /* ── the two label sets that were English-only ── */
+
+  "cat.canape": { en: "Canapés & bites", es: "Canapés y bocados", section: "labels" },
+  "cat.main": { en: "Mains", es: "Platos de fondo", section: "labels" },
+  "cat.side": { en: "Sides & breads", es: "Guarniciones y panes", section: "labels" },
+  "cat.bowl": { en: "Bowls", es: "Bowls", section: "labels" },
+  "cat.breakfast": { en: "Breakfast", es: "Desayunos", section: "labels" },
+  "cat.bakery": { en: "Bakery", es: "Panadería y pastelería", section: "labels" },
+  "cat.dessert": { en: "Desserts", es: "Postres", section: "labels" },
+
+  "diet.vegetarian": { en: "Vegetarian", es: "Vegetariano", section: "labels" },
+  "diet.vegan": { en: "Vegan", es: "Vegano", section: "labels" },
+  "diet.pescatarian": { en: "Pescatarian", es: "Pescetariano", section: "labels" },
+  "diet.glutenFree": { en: "Coeliac / gluten-free", es: "Celíaco / sin gluten", section: "labels" },
+  "diet.dairyFree": { en: "Lactose / dairy-free", es: "Sin lactosa / sin lácteos", section: "labels" },
+  "diet.nutFree": { en: "Nut-free", es: "Sin frutos secos", section: "labels" },
+  "diet.noPork": { en: "No pork", es: "Sin cerdo", section: "labels" },
+  "diet.noAlcohol": { en: "No alcohol", es: "Sin alcohol", section: "labels" },
+  "diet.halalIngredients": { en: "Halal — ingredients only", es: "Halal — solo ingredientes", section: "labels" },
+  "diet.kosherIngredients": { en: "Kosher — ingredients only", es: "Kosher — solo ingredientes", section: "labels" },
+  "diet.lowFodmap": { en: "Low FODMAP", es: "Bajo en FODMAP", section: "labels" },
+  "diet.lowerCarb": { en: "Lower carb / keto-leaning", es: "Bajo en carbohidratos / keto", section: "labels" },
+  "diet.lowerSugar": { en: "Lower sugar", es: "Bajo en azúcar", section: "labels" },
+  "diet.kidFriendly": { en: "Children", es: "Para niños", section: "labels" },
+  "diet.softTexture": { en: "Soft texture", es: "Textura suave", section: "labels" },
+
+
+  /* The EU 14, plus pork and alcohol. Safety labels, so both languages. */
+  "allg.gluten": { en: "Gluten", es: "Gluten", section: "labels" },
+  "allg.crustaceans": { en: "Crustaceans", es: "Crustáceos", section: "labels" },
+  "allg.eggs": { en: "Eggs", es: "Huevo", section: "labels" },
+  "allg.fish": { en: "Fish", es: "Pescado", section: "labels" },
+  "allg.peanuts": { en: "Peanuts", es: "Maní", section: "labels" },
+  "allg.soya": { en: "Soya", es: "Soya", section: "labels" },
+  "allg.milk": { en: "Milk", es: "Leche", section: "labels" },
+  "allg.nuts": { en: "Tree nuts", es: "Frutos secos", section: "labels" },
+  "allg.celery": { en: "Celery", es: "Apio", section: "labels" },
+  "allg.mustard": { en: "Mustard", es: "Mostaza", section: "labels" },
+  "allg.sesame": { en: "Sesame", es: "Ajonjolí", section: "labels" },
+  "allg.sulphites": { en: "Sulphites", es: "Sulfitos", section: "labels" },
+  "allg.lupin": { en: "Lupin", es: "Altramuz / chocho", section: "labels" },
+  "allg.molluscs": { en: "Molluscs", es: "Moluscos", section: "labels" },
+  "allg.pork": { en: "Pork", es: "Cerdo", section: "labels" },
+  "allg.alcohol": { en: "Alcohol", es: "Alcohol", section: "labels" },
+
+  "pub.staffOnly": {
+    en: "Costs, recipes and quotes are behind the sign-in.",
+    es: "Costos, recetas y cotizaciones están detrás del acceso.", section: "public" }
 };
 
 /** A phrase book for one render: the defaults, with any saved rows over them. */
@@ -413,6 +545,46 @@ export async function loadCopy(locale: Locale): Promise<CopyBook> {
 }
 
 /** The defaults alone, for code paths with no database in reach. */
+/**
+ * The two label sets that were English only.
+ *
+ * CATEGORY_LABEL and DIET_LABEL have lived in lib/dishes.ts and lib/dietary.ts
+ * since the beginning, in English, and every page rendered them as-is. Nobody
+ * noticed because the pages around them were English too — until a Spanish shop
+ * window put "Canapés & bites" and "Coeliac / gluten-free" under a Spanish
+ * heading, for customers in Lima.
+ *
+ * The English records stay where they are: they are the code default and the
+ * fallback, and the standalone build reads them directly. These helpers look
+ * the phrase up in the copy book first, so both languages are enforced by the
+ * same test as everything else — and so the owner can reword "Guarniciones y
+ * panes" in the admin without a deploy.
+ */
+const camel = (id: string) =>
+  id.split("-").map((w, i) => (i === 0 ? w : w[0].toUpperCase() + w.slice(1))).join("");
+
+export const categoryLabel = (t: CopyBook, id: string, fallback: string) =>
+  resolve(t, `cat.${camel(id)}`, fallback);
+
+export const dietLabel = (t: CopyBook, id: string, fallback: string) =>
+  resolve(t, `diet.${camel(id)}`, fallback);
+
+/**
+ * The EU 14 declarable allergens, plus pork and alcohol.
+ *
+ * These matter more than the other two label sets. A guest scanning a menu for
+ * "APIO" and reading "CELERY" has not been told anything, and celery is on the
+ * list precisely because it puts people in hospital.
+ */
+export const allergenLabel = (t: CopyBook, id: string, fallback: string) =>
+  resolve(t, `allg.${camel(id)}`, fallback);
+
+/** A missing key renders ⟨key⟩; for a label, the English is a better answer. */
+function resolve(t: CopyBook, key: string, fallback: string): string {
+  const out = t(key);
+  return out.startsWith("\u27E8") ? fallback : out;
+}
+
 export function staticCopy(locale: Locale): CopyBook {
   return (key: string) => {
     const row = COPY[key];

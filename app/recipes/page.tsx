@@ -3,6 +3,8 @@ import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import Recipes from "@/components/Recipes";
 import { menu } from "@/lib/repo/menu";
+import { loadCopy, categoryLabel } from "@/lib/copy";
+import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 import { RECIPES } from "@/data/recipes";
 
 export const metadata: Metadata = { title: "Recipes" };
@@ -10,6 +12,11 @@ export const metadata: Metadata = { title: "Recipes" };
 export default async function RecipesPage() {
   const me = await requireCan(CAN.seeKitchen, "open the recipes");
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
+  const categories = Object.fromEntries(
+    CATEGORY_ORDER.map((c) => [c, categoryLabel(t, c, CATEGORY_LABEL[c])])
+  );
+
 
   return (
     <>
@@ -24,7 +31,7 @@ export default async function RecipesPage() {
         </p>
       </section>
       <section className="py-10">
-        <Recipes dishes={visibleDishes(dishes, me.role)} recipes={RECIPES} />
+        <Recipes categories={categories} dishes={visibleDishes(dishes, me.role)} recipes={RECIPES} />
       </section>
     </>
   );

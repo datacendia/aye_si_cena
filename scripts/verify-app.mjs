@@ -56,18 +56,116 @@ const has = (text, needle, m) =>
 const browser = await chromium.launch({ args: ["--no-sandbox", "--disable-dev-shm-usage"] });
 const page = await browser.newPage({ viewport: { width: 1280, height: 1100 } });
 
+/* ──────────────────── the shop window, signed OUT ───────────────────── */
+
+/*
+ * Run before signing in, on a context that has never held a cookie. Everything
+ * else in this file signs in first, which is precisely how /reset went a whole
+ * day redirecting every visitor to a login box they could not get past: the
+ * page worked, the token worked, and no test ever arrived without a session.
+ *
+ * The leak check reads the rendered bytes rather than the object graph. That is
+ * the technique that caught supplier names shipping through the Spanish
+ * dictionary in the client standalone after the English had been stripped.
+ */
+console.log("the shop window, signed out");
+{
+  const stranger = await browser.newContext();
+  const visitor = await stranger.newPage();
+
+  const { DISHES } = await import("../.verify-dishes.mjs").catch(() => ({ DISHES: null }));
+
+  for (const path of ["/", "/carta", "/paquetes", "/eventos"]) {
+    const res = await visitor.goto(BASE + path, { waitUntil: "networkidle" });
+    const url = visitor.url();
+
+    if (res?.status() !== 200 || url.includes("/login")) {
+      no(`${path} — a stranger is sent to ${url.replace(BASE, "") || "?"}`);
+      continue;
+    }
+    ok(`${path} opens without a login`);
+
+    const html = await visitor.content();
+
+    if (DISHES) {
+      const suppliers = [...new Set(DISHES.map((d) => d.source).filter(Boolean))];
+      const named = suppliers.filter((x) => html.includes(x));
+      named.length === 0
+        ? ok(`${path} names no supplier`)
+        : no(`${path} names ${named.length} supplier(s): ${named.slice(0, 3).join(", ")}`);
+
+      const costs = [...new Set(DISHES.map((d) => d.cost.toFixed(2)))];
+      const shown = costs.filter((c) => html.includes(c));
+      shown.length === 0
+        ? ok(`${path} carries no dish cost`)
+        : no(`${path} carries ${shown.length} cost figure(s): ${shown.slice(0, 3).join(", ")}`);
+    }
+
+    /*
+     * Serialised keys, not bare words. The first version of this looked for
+     * "margin" and found it four times on every page — in the CSS of Next's
+     * own not-found styles. A verifier that cries wolf is worse than none,
+     * because the next real finding is skimmed past with the rest.
+     *
+     * What an actual leak looks like is a field name in the RSC payload, so
+     * that is what is checked: `\"cost\":` and friends, as they would be
+     * escaped inside the flight data.
+     */
+    for (const key of ["cost", "price", "source", "costVerified",
+                       "priceAtQuote", "costAtQuote", "foodCostTotal"]) {
+      for (const shape of [`\\"${key}\\":`, `"${key}":`]) {
+        if (html.includes(shape)) no(`${path} serialises a "${key}" field`);
+      }
+    }
+  }
+
+  // And the private pages still are.
+  for (const path of ["/panel", "/menu", "/prices", "/engineering", "/admin", "/quotes"]) {
+    await visitor.goto(BASE + path, { waitUntil: "networkidle" });
+    visitor.url().includes("/login")
+      ? ok(`${path} still sends a stranger to the login`)
+      : no(`${path} OPENED for a stranger`);
+  }
+
+  // The reset page must be reachable without a session — a spent token is the
+  // right answer here; a redirect to /login is not.
+  await visitor.goto(`${BASE}/reset/not-a-real-token`, { waitUntil: "networkidle" });
+  visitor.url().includes("/login")
+    ? no("/reset/<token> sends a stranger to the login, so no link can ever be used")
+    : ok("/reset/<token> is reachable without a session");
+
+  // And on a phone, which is where a WhatsApp link is opened.
+  await visitor.setViewportSize({ width: 390, height: 844 });
+  for (const path of ["/", "/carta", "/paquetes", "/eventos"]) {
+    await visitor.goto(BASE + path, { waitUntil: "networkidle" });
+    const over = await visitor.evaluate(() =>
+      document.documentElement.scrollWidth - document.documentElement.clientWidth);
+    over <= 1 ? ok(`${path} fits a phone`) : no(`${path} scrolls sideways by ${over}px`);
+  }
+
+  await stranger.close();
+}
+
 /* ───────────────────────────── signing in ───────────────────────────── */
 
 await page.goto(`${BASE}/login`, { waitUntil: "networkidle" });
 await page.fill('input[name="email"]', EMAIL);
 await page.fill('input[name="password"]', PASSWORD);
 await Promise.all([
-  page.waitForURL(`${BASE}/`, { timeout: 30_000 }),
+  /*
+   * Wait to leave /login rather than for one destination.
+   *
+   * Signing in sends you to "/", and "/" now sends staff on to /panel — so a
+   * waitForURL("/") races the second redirect and times out about half the
+   * time. What is actually being asserted is "the login is behind us".
+   */
+  page.waitForURL((url) => !url.pathname.startsWith("/login"), { timeout: 30_000 }),
   // Scoped to its own form: the header carries a language toggle and a sign-out
   // button, both type="submit", and both come first in the DOM.
   page.locator('form:has(input[name="password"]) button[type="submit"]').click()
 ]);
-ok("signs in and lands on the home page");
+await page.waitForURL(`${BASE}/panel`, { timeout: 30_000 });
+ok("signs in and lands on /panel, not on the shop window");
 
 /*
  * The account decides the language, not a cookie — so set it rather than assume
@@ -214,7 +312,7 @@ await page.waitForTimeout(2000);
 console.log("\n390px — no sideways scroll anywhere");
 await page.setViewportSize({ width: 390, height: 844 });
 const PAGES = [
-  "/", "/find", "/moments", "/menu", "/recipes", "/seasonal", "/compare",
+  "/panel", "/find", "/moments", "/menu", "/recipes", "/seasonal", "/compare",
   "/graph", "/packages", "/builder", "/quotes", "/clients", "/bookings",
   "/prices", "/take", "/propose", "/engineering", "/admin", "/account"
 ];

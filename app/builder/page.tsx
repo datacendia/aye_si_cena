@@ -3,12 +3,19 @@ import { requireCan, CAN } from "@/lib/session";
 import type { Metadata } from "next";
 import MenuBuilder from "@/components/MenuBuilder";
 import { menu } from "@/lib/repo/menu";
+import { loadCopy, categoryLabel } from "@/lib/copy";
+import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 
 export const metadata: Metadata = { title: "Build a menu" };
 
 export default async function BuilderPage() {
   const me = await requireCan(CAN.writeQuotes, "build and price a menu");
   const dishes = await menu(me.locale);
+  const t = await loadCopy(me.locale);
+  const categories = Object.fromEntries(
+    CATEGORY_ORDER.map((c) => [c, categoryLabel(t, c, CATEGORY_LABEL[c])])
+  );
+
 
   return (
     <>
@@ -23,7 +30,7 @@ export default async function BuilderPage() {
         </p>
       </section>
       <section className="py-10">
-        <MenuBuilder dishes={fullDishes(dishes, me.role)} />
+        <MenuBuilder categories={categories} dishes={fullDishes(dishes, me.role)} />
       </section>
     </>
   );

@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { requireCan, CAN } from "@/lib/session";
 import { listClients } from "@/lib/repo/clients";
-import { DIET_LABEL, type Diet } from "@/lib/dietary";
+import { DIETS, DIET_LABEL, type Diet } from "@/lib/dietary";
+import { dietLabel } from "@/lib/copy";
 import ClientForm from "./form";
 
 export const metadata: Metadata = { title: "Clients" };
@@ -25,7 +26,11 @@ export default async function ClientsPage() {
       </section>
 
       <section className="grid gap-10 py-10 md:grid-cols-[340px_1fr]">
-        {CAN.manageClients(me.role) ? <ClientForm /> : <div />}
+        {CAN.manageClients(me.role) ? <ClientForm
+            dietLabels={Object.fromEntries(
+              DIETS.map((d) => [d, dietLabel(t, d, DIET_LABEL[d])])
+            )}
+          /> : <div />}
 
         <div>
           <h2 className="font-display text-2xl font-semibold tracking-tight">
@@ -59,7 +64,7 @@ export default async function ClientsPage() {
                           className="rounded border border-thistle px-1.5 py-0.5 font-mono
                                      text-[10px] uppercase tracking-wider text-thistle"
                         >
-                          {DIET_LABEL[d as Diet] ?? d}
+                          {dietLabel(t, d, DIET_LABEL[d as Diet] ?? d)}
                         </span>
                       ))}
                     </p>

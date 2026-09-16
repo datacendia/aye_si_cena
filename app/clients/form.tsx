@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { addClient } from "./actions";
-import { DIETS, DIET_LABEL } from "@/lib/dietary";
+import { DIETS } from "@/lib/dietary";
 import { DISTRICTS } from "@/data/venues";
 
 const field =
@@ -22,7 +22,7 @@ function Submit() {
   );
 }
 
-export default function ClientForm() {
+export default function ClientForm({ dietLabels }: { dietLabels: Record<string, string> }) {
   const [error, action] = useActionState(addClient, undefined);
 
   return (
@@ -69,7 +69,7 @@ export default function ClientForm() {
                            text-ink-2 has-[:checked]:border-thistle has-[:checked]:text-thistle"
               >
                 <input type="checkbox" name="diets" value={d} className="sr-only" />
-                {DIET_LABEL[d]}
+                {dietLabels[d] ?? d}
               </label>
             ))}
           </div>

@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { join, sep } from "node:path";
 
 /**
  * Every page checks the viewer on the server.
@@ -25,6 +25,17 @@ const APP = join(__dirname, "..", "app");
  */
 const PUBLIC_PAGES = new Set(["login", "reset/[token]"]);
 
+/**
+ * The shop window.
+ *
+ * Everything under app/(public)/ is meant to be opened by a stranger, so
+ * "unguarded" is not the failure mode there — leaking is. Those pages get a
+ * stricter test of their own below: they may not reach data/dishes.ts,
+ * lib/repo/, or the pricing internals at all, and what they render is checked
+ * against the real matrix for cost, supplier and margin.
+ */
+const isPublic = (file: string) => file.includes(`${sep}(public)${sep}`);
+
 function pages(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
     const full = join(dir, entry);
@@ -47,6 +58,7 @@ describe("no page renders without asking who is looking", () => {
 
   it("guards every page that is not deliberately public", () => {
     const unguarded = found
+      .filter((p) => !isPublic(p.file))
       .filter((p) => !PUBLIC_PAGES.has(p.route.replace(/^\//, "")))
       .filter((p) => !/require(Viewer|Can)\s*\(/.test(p.src))
       .map((p) => p.route || "/");
@@ -134,7 +146,7 @@ describe("no page hands raw dishes to the browser", () => {
     // what goes in the form's placeholder, and it is how the owner sees what
     // they are changing from. Every other page shows the edited menu.
     const direct = found
-      .filter((p) => p.route !== "/admin")
+      .filter((p) => p.route !== "/admin" && !isPublic(p.file))
       .filter((p) => /from "@\/data\/dishes"/.test(p.src))
       .map((p) => p.route || "/");
     expect(direct).toEqual([]);
@@ -142,6 +154,7 @@ describe("no page hands raw dishes to the browser", () => {
 
   it("loads it in the reader's language", () => {
     const wrong = found
+      .filter((p) => !isPublic(p.file))
       .filter((p) => /\bmenu\(/.test(p.src))
       .filter((p) => !/\bmenu\(me\.locale\)/.test(p.src))
       .map((p) => p.route || "/");
@@ -176,16 +189,56 @@ describe("nothing is prerendered", () => {
 describe("the outer gate is deny-by-default", () => {
   const middleware = readFileSync(join(__dirname, "..", "middleware.ts"), "utf8");
 
+  /** Every path the gate lets through without a session. */
+  const gateOpens = () =>
+    ["PUBLIC_EXACT", "PUBLIC_PREFIX"]
+      .flatMap((name) => {
+        const block = new RegExp(`const ${name} = \\[([\\s\\S]*?)\\];`).exec(middleware)![1];
+        return [...block.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+      })
+      .sort();
+
   it("lists what is public rather than what is private", () => {
     // An allow-list of private routes would leave every new page open. This
     // must be the other way round.
-    expect(middleware).toMatch(/const PUBLIC\s*=/);
+    expect(middleware).toMatch(/const PUBLIC_EXACT\s*=/);
+    expect(middleware).toMatch(/const PUBLIC_PREFIX\s*=/);
     expect(middleware).not.toMatch(/const PRIVATE\s*=/);
   });
 
-  it("lets nothing through but the login page and the auth endpoints", () => {
-    const list = /const PUBLIC = \[([^\]]*)\]/.exec(middleware)![1];
-    const entries = [...list.matchAll(/"([^"]+)"/g)].map((m) => m[1]).sort();
-    expect(entries).toEqual(["/api/auth", "/login"]);
+  it("lets nothing through but the login, the reset and the shop window", () => {
+    expect(gateOpens()).toEqual(["/", "/api/auth", "/carta", "/eventos", "/login", "/paquetes", "/reset"]);
+  });
+
+  /**
+   * The gate and the pages must agree, in both directions.
+   *
+   * A public page the gate blocks is invisible: the page exists, its tests
+   * pass, and every visitor is redirected to a login box. That is exactly what
+   * happened to /reset on its first day — the token worked and nobody could
+   * reach it, because every test signed in before it looked.
+   *
+   * A gate entry with no page behind it is the opposite failure: a door
+   * somebody opened and forgot to close.
+   */
+  it("opens exactly the pages in app/(public)/, and no others", () => {
+    const shopWindow = found
+      .filter((p) => isPublic(p.file))
+      .map((p) => p.route.replace(/\/\(public\)/g, "") || "/")
+      .sort();
+
+    const opened = gateOpens().filter((e) => !["/login", "/api/auth", "/reset"].includes(e)).sort();
+    expect(opened).toEqual(shopWindow);
+  });
+
+  it("matches on whole path segments, so /carta does not open /cartagena", () => {
+    // A plain startsWith would, and nobody notices until a route is named badly.
+    expect(middleware).toMatch(/pathname === p \|\| pathname\.startsWith\(`\$\{p\}\/`\)/);
+    expect(middleware).not.toMatch(/PUBLIC\.some\(\(p\) => pathname\.startsWith\(p\)\)/);
+  });
+
+  it("keeps the root out of the prefix list, where it would open everything", () => {
+    const prefixes = /const PUBLIC_PREFIX = \[([\s\S]*?)\];/.exec(middleware)![1];
+    expect([...prefixes.matchAll(/"([^"]+)"/g)].map((m) => m[1])).not.toContain("/");
   });
 });
