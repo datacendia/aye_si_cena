@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { viewer } from "@/lib/session";
 import { loadCopy } from "@/lib/copy";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { publicMenu, publicPackages } from "@/lib/public";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
 import { categoryLabel } from "@/lib/copy";
@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export default async function PublicHome() {
   if (await viewer()) redirect("/panel");
 
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
   const dishes = await publicMenu(locale);
   const packages = await publicPackages(locale);

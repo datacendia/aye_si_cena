@@ -317,3 +317,93 @@ export const passwordResets = pgTable("password_resets", {
   issuedBy: text("issued_by").references(() => users.id, { onDelete: "set null" }),
   issuedAt: timestamp("issued_at", { mode: "date" }).notNull().defaultNow()
 }, (t) => ({ byUser: index("password_resets_user_idx").on(t.userId) }));
+
+/* ──────────────────── what the label said, and when ──────────────────── */
+
+/**
+ * An immutable snapshot of a dish's allergen declaration.
+ *
+ * The QR on a box resolves to a page generated live from the recipe, which is
+ * exactly right for a guest standing at a party — it cannot be stale. It is
+ * exactly wrong six months later, when somebody asks what the label on that box
+ * said on the fourteenth of March, because by then the recipe may have changed
+ * and the live page will answer for today.
+ *
+ * So every distinct declaration is written down once, keyed by a fingerprint of
+ * its own content. Re-declaring the same thing touches `lastSeen` and nothing
+ * else; changing a recipe's allergens writes a new row and leaves the old one
+ * standing. What you get is a dated history of what you told people, which is
+ * the only form of this record worth having when it is read out in a hearing.
+ *
+ * Nothing is ever updated in place and nothing is ever deleted. That is the
+ * point of the table.
+ */
+export const declarations = pgTable("declarations", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  dishId: integer("dish_id").notNull(),
+  /** SHA-256 of the declared content. Same content, same row. */
+  fingerprint: text("fingerprint").notNull(),
+  /** The dish's name when this was declared — names get edited too. */
+  name: text("name").notNull(),
+  allergens: jsonb("allergens").$type<string[]>().notNull(),
+  suits: jsonb("suits").$type<string[]>().notNull(),
+  firstSeen: timestamp("first_seen", { mode: "date" }).notNull().defaultNow(),
+  lastSeen: timestamp("last_seen", { mode: "date" }).notNull().defaultNow()
+}, (t) => ({
+  byDish: index("declarations_dish_idx").on(t.dishId, t.firstSeen),
+  onePerContent: uniqueIndex("declarations_fingerprint_idx").on(t.dishId, t.fingerprint)
+}));
+
+/* ─────────────────────── what the event really cost ─────────────────────── */
+
+/**
+ * What a booking actually cost, once it is over.
+ *
+ * Every margin figure in this app is modelled: the food cost comes from the
+ * recipe priced with estimates, and the service cost from the tier's staffing
+ * rules. Both are good models and neither is a receipt.
+ *
+ * One row per booking, filled in afterwards from what was actually spent. The
+ * difference between this and the quote is the only honest answer to "did that
+ * job make money", and it is the number that tells you whether the model needs
+ * changing or the kitchen does.
+ */
+export const eventActuals = pgTable("event_actuals", {
+  bookingId: text("booking_id").primaryKey()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  /** Soles actually spent on food, from the receipts. */
+  foodSpend: real("food_spend"),
+  staffSpend: real("staff_spend"),
+  transportSpend: real("transport_spend"),
+  otherSpend: real("other_spend"),
+  /** Guests who actually turned up. Rarely the number that was quoted. */
+  guestsServed: integer("guests_served"),
+  note: text("note"),
+  recordedBy: text("recorded_by").references(() => users.id, { onDelete: "set null" }),
+  recordedAt: timestamp("recorded_at", { mode: "date" }).notNull().defaultNow()
+});
+
+/* ───────────────────── the link you send a client ──────────────────── */
+
+/**
+ * One booking, shareable by link.
+ *
+ * The eleven WhatsApp messages before every event are all the same eleven
+ * questions: what is the menu, what time, how many, what about the nut allergy,
+ * what do we owe. This is a page that answers them, and a link that opens it
+ * without an account — because the bride's mother is not getting a login.
+ *
+ * Same shape as the password reset: only the SHA-256 is stored, so a leaked
+ * backup carries nothing anybody can open. Unlike a reset it is long-lived and
+ * reusable — it is meant to be read twenty times — and revocable, because a
+ * link that outlives the relationship is a menu somebody can still read.
+ */
+export const bookingShares = pgTable("booking_shares", {
+  tokenHash: text("token_hash").primaryKey(),
+  bookingId: text("booking_id").notNull()
+    .references(() => bookings.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+  revokedAt: timestamp("revoked_at", { mode: "date" }),
+  issuedBy: text("issued_by").references(() => users.id, { onDelete: "set null" }),
+  issuedAt: timestamp("issued_at", { mode: "date" }).notNull().defaultNow()
+}, (t) => ({ byBooking: index("booking_shares_booking_idx").on(t.bookingId) }));

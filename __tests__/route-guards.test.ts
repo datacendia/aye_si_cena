@@ -207,7 +207,9 @@ describe("the outer gate is deny-by-default", () => {
   });
 
   it("lets nothing through but the login, the reset and the shop window", () => {
-    expect(gateOpens()).toEqual(["/", "/api/auth", "/carta", "/eventos", "/login", "/paquetes", "/reset"]);
+    expect(gateOpens()).toEqual([
+      "/", "/api/auth", "/carta", "/evento", "/eventos", "/login", "/paquetes", "/reset"
+    ]);
   });
 
   /**

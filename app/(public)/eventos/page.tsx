@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { viewer } from "@/lib/session";
 import { loadCopy } from "@/lib/copy";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { publicMenu } from "@/lib/public";
 import { MOMENTS } from "@/data/moments";
 import { matchesEvent } from "@/lib/dishes";
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default async function EventosPage() {
   if (await viewer()) redirect("/moments");
 
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
   const dishes = await publicMenu(locale);
 

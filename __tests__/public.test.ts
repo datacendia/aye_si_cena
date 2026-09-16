@@ -127,11 +127,26 @@ describe("the shop window reaches nothing it should not", () => {
       .toBe(true);
   });
 
-  it("imports no dish data, no repository and no session guard", () => {
+  it("imports no dish data, no costing, and no repository but the three named", () => {
+    /*
+     * The rule is about the MENU, not about the word "repo".
+     *
+     * A public page must never reach the dish matrix, the price book or the
+     * costing engine — lib/public.ts builds by whitelist and is the only way
+     * in. Three repositories are allowed through, and each earns it:
+     *
+     *   repo/menu   lib/public.ts itself reads it, to pick up admin edits.
+     *   repo/pack   the token-authorised read of one booking. It IS the
+     *               feature; /evento/<token> has nothing else to do.
+     *   repo/declarations
+     *               a WRITE, not a read: the scan records what it served. It
+     *               reads no dish data at all.
+     */
+    const allowedRepos = /from "@\/lib\/repo\/(menu|pack|declarations)"/;
+
     const banned: [RegExp, string][] = [
       [/from "@\/data\/dishes"/, "the raw dish matrix"],
       [/from "@\/data\/prices"/, "the price book"],
-      [/from "@\/lib\/repo\//, "a repository — lib/public.ts is the only way in"],
       [/from "@\/lib\/costing"/, "the costing engine"],
       [/\brequireViewer\b|\brequireCan\b/, "a guard these pages must not have"]
     ];
@@ -140,6 +155,9 @@ describe("the shop window reaches nothing it should not", () => {
     for (const f of publicFiles) {
       for (const [pattern, why] of banned) {
         if (pattern.test(f.src)) found.push(`${f.rel} imports ${why}`);
+      }
+      for (const m of f.src.matchAll(/from "@\/lib\/repo\/[\w-]+"/g)) {
+        if (!allowedRepos.test(m[0])) found.push(`${f.rel} imports ${m[0]}`);
       }
     }
     expect(found).toEqual([]);
@@ -163,13 +181,19 @@ describe("the shop window reaches nothing it should not", () => {
      * Not for secrecy — for usefulness. A chef landing on the customer menu has
      * lost the recipes; the redirect puts them where their tools are.
      *
-     * /carta/[id] is the exception and the reason is worth stating: it is the
-     * page a QR code on a box lands on, and it has no staff equivalent because
-     * it IS the declaration. A chef scanning a box at 6am to check whether it
-     * contains celery should see exactly what the guest sees — the same words,
-     * off the same recipe. Bouncing them somewhere else would defeat the label.
+     * Two exceptions, and both are pages where being redirected would be the
+     * bug rather than the fix:
+     *
+     * /carta/[id] is where a QR code on a box lands. A chef scanning one at 6am
+     * to check whether it contains celery should see exactly what the guest
+     * sees — the same words, off the same recipe. Bouncing them somewhere else
+     * would defeat the label. The recipe is one tap away instead.
+     *
+     * /evento/[token] is the link sent to a client. When the owner opens it to
+     * check what was sent, showing them something different would defeat the
+     * only reason to look.
      */
-    const noStaffVersion = [`carta${sep}[id]`];
+    const noStaffVersion = [`carta${sep}[id]`, `evento${sep}[token]`];
 
     for (const f of publicFiles.filter((x) => x.rel.endsWith(`${sep}page.tsx`))) {
       if (noStaffVersion.some((x) => f.rel.includes(x))) {
@@ -178,6 +202,29 @@ describe("the shop window reaches nothing it should not", () => {
       }
       expect(f.src).toMatch(/if \(await viewer\(\)\) redirect\(/);
     }
+  });
+
+  it("reads the signed-in reader's own language, not the cookie", () => {
+    /*
+     * publicLocale() answers from a cookie, which is right for a stranger and
+     * wrong for staff: a signed-in person has a locale on their user row, and
+     * reading the cookie for them produced a page whose header said English and
+     * whose body was Spanish. A chef whose account is English scanned a box and
+     * got Spanish.
+     *
+     * readerLocale() prefers the account. Every public page must use it.
+     */
+    const wrong = publicFiles
+      .filter((f) => /page\.tsx$/.test(f.rel))
+      .filter((f) => /\bpublicLocale\(/.test(f.src))
+      .map((f) => f.rel);
+    expect(wrong).toEqual([]);
+
+    const missing = publicFiles
+      .filter((f) => /page\.tsx$/.test(f.rel))
+      .filter((f) => !/\breaderLocale\(/.test(f.src))
+      .map((f) => f.rel);
+    expect(missing).toEqual([]);
   });
 
   it("is reachable with JavaScript off where it can be", () => {

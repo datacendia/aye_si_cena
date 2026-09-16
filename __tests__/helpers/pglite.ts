@@ -34,6 +34,7 @@ const TABLES = [
   "quote_dishes", "quotes", "bookings", "price_overrides",
   "site_copy", "dish_edits", "accounts", "sessions",
   "verification_tokens", "login_attempts", "password_resets",
+  "declarations", "event_actuals", "booking_shares",
   "users", "clients"
 ];
 

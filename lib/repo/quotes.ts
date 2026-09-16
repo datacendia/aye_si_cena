@@ -68,7 +68,7 @@ export interface SavedQuote {
  * that arrives in a form is a number somebody can edit, and a quote is the one
  * artefact in this app that a client will hold you to.
  */
-function price(input: QuoteInput) {
+function price(input: QuoteInput, pressure?: { surcharge: number; label: string }) {
   const dishes = DISHES.filter((d) => input.dishIds.includes(d.id));
   if (dishes.length === 0) throw new Error("A quote needs at least one dish.");
 
@@ -84,14 +84,40 @@ function price(input: QuoteInput) {
       venue: input.venue
         ? VENUE_TYPES.find((v) => v.id === input.venue)
         : undefined,
-      peak: input.peak ?? false
+      peak: input.peak ?? false,
+      pressure: pressure?.surcharge,
+      pressureLabel: pressure?.label
     })
   };
 }
 
+/**
+ * How full the quoted date already is.
+ *
+ * Only asked when the quote carries a date — pricing scarcity on a date nobody
+ * has named would be pricing a guess. Bookings the capacity engine cannot judge
+ * (no district, so no travel time) are left out rather than assumed: a day is
+ * only busy if we can show it is.
+ */
+async function pressureOn(me: Viewer, eventDate: Date | null | undefined) {
+  if (!eventDate) return undefined;
+
+  const { bookingsOn, toCapacity } = await import("./bookings");
+  const { pressureFor, PRESSURE_LABEL } = await import("@/lib/pressure");
+
+  const sold = (await bookingsOn(me, eventDate))
+    .map(toCapacity)
+    .filter((b): b is NonNullable<typeof b> => b !== null);
+
+  const p = pressureFor(sold);
+  if (p.surcharge <= 1) return undefined;
+
+  return { surcharge: p.surcharge, label: PRESSURE_LABEL[p.level].en, detail: p };
+}
+
 export async function createQuote(me: Viewer, input: QuoteInput): Promise<string> {
   assertCan(CAN.writeQuotes, me.role, "create a quote");
-  const { dishes, quote } = price(input);
+  const { dishes, quote } = price(input, await pressureOn(me, input.eventDate));
 
   const [row] = await db.insert(quotes).values({
     name: input.name.trim() || "Untitled quote",
@@ -123,7 +149,7 @@ export async function createQuote(me: Viewer, input: QuoteInput): Promise<string
 
 export async function updateQuote(me: Viewer, id: string, input: QuoteInput): Promise<void> {
   assertCan(CAN.writeQuotes, me.role, "edit a quote");
-  const { dishes, quote } = price(input);
+  const { dishes, quote } = price(input, await pressureOn(me, input.eventDate));
 
   await db.update(quotes).set({
     name: input.name.trim() || "Untitled quote",

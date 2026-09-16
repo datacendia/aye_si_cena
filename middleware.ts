@@ -41,7 +41,9 @@ const PUBLIC_PREFIX = [
   /* The shop window. */
   "/carta",
   "/paquetes",
-  "/eventos"
+  "/eventos",
+  /* One booking, on a link the client was sent. The token is the authority. */
+  "/evento"
 ];
 
 function isPublic(pathname: string): boolean {

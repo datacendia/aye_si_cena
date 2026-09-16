@@ -187,6 +187,17 @@ export interface QuoteInput {
   venue?: VenueType;
   /** Loading in during Lima rush hour. Most evening events do. */
   peak?: boolean;
+  /**
+   * Multiplier on the service half, from lib/pressure.ts. 1 means a quiet day.
+   *
+   * Never below 1, and buildQuote does not enforce that — lib/pressure.ts is
+   * the only thing that should be producing it, and it never discounts. A
+   * caterer who drops the price on an empty Saturday has taught the market to
+   * wait, and there are about fifty Saturdays a year to sell.
+   */
+  pressure?: number;
+  /** What the surcharge line says. Shown to the client, so write it for them. */
+  pressureLabel?: string;
 }
 
 export interface QuoteLine {
@@ -324,6 +335,30 @@ export function buildQuote(input: QuoteInput): Quote {
     },
     transportLine
   ].filter((l) => l.total > 0);
+
+  /*
+   * A busy day costs more to serve, and the quote says so as a line.
+   *
+   * Applied to the service half only. Food cost does not rise because the
+   * kitchen is busy — what rises is the cost of getting four people and a van
+   * to a second address on the same afternoon, and the value of the last slot
+   * anybody can have.
+   *
+   * It is a line rather than a bigger number in an existing line on purpose. A
+   * surcharge a client discovers is a surcharge that loses the job; one that
+   * arrives as "this is our last Saturday in December" is a reason to book
+   * today. lib/pressure.ts supplies the sentence.
+   */
+  const pressure = input.pressure ?? 1;
+  if (pressure > 1) {
+    const base = serviceLines.reduce((sum, l) => sum + l.total, 0);
+    const extra = base * (pressure - 1);
+    serviceLines.push({
+      label: input.pressureLabel ?? "Date in demand",
+      perGuest: extra / guests,
+      total: extra
+    });
+  }
 
   const serviceCostPerGuest = serviceLines.reduce((s, l) => s + l.perGuest, 0);
 

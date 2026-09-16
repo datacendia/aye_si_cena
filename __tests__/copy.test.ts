@@ -38,7 +38,7 @@ describe("every phrase exists in both languages", () => {
     const same = ["prices.soles", "bookings.provisional", "admin.spanish", "take.planchas",
       "nav.home", "cat.bowl",
       // Words that are the same in both languages.
-      "allg.gluten", "allg.soya", "allg.alcohol"];
+      "allg.gluten", "allg.soya", "allg.alcohol", "kitchen.minutes"];
     const suspect = keys.filter((k) => COPY[k].en === COPY[k].es && !same.includes(k));
     expect(suspect).toEqual([]);
   });

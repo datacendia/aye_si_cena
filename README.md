@@ -297,6 +297,42 @@ The counters live in a table rather than in memory because the app runs in
 Netlify functions, where each request may be a fresh process and an in-memory
 counter would reset itself and protect nothing.
 
+## Six things that read what was already there
+
+**Did it pay?** (`/postmortem`) Every margin in this app is modelled — food cost
+from the recipe, service from the tier's rules — and neither is a receipt.
+Record what you actually spent and it compares against **what was quoted**, not
+against today's prices. That distinction is why `costAtQuote` is stored: without
+it you compare March spending to September prices and call the difference
+margin. The gap tells you which is wrong, the model or the kitchen.
+
+**A busy Saturday costs more** (`lib/pressure.ts`). `couldTake()` already knew
+how full a day was; now a quote on a filling date carries a surcharge **as a
+visible line with a sentence** — "this is the last job the kitchen can take that
+day". It never discounts a quiet day, and never prices a day it cannot judge.
+Service half only; food does not cost more because you are busy.
+
+**The kitchen's own scan** (`/kitchen/<id>`). The same sticker: a guest gets the
+allergens, a signed-in chef gets the recipe scaled to today's booking and how
+long it holds. The chef is *not* redirected off the guest page — they scanned it
+to check something a guest asked.
+
+**What the label said, and when** (`declarations`). The QR resolves to a page
+generated live, which is right for a guest and wrong six months later in a
+hearing. Every distinct declaration is written down once, keyed by a fingerprint
+of its own content, and never edited or deleted. `declaredOn(dish, date)`
+answers under oath.
+
+**Your stalls** (`/suppliers`). Every verified price records where it was bought
+and nothing read it back. `/prices` says *what* is rising; this says *who*, and
+those have opposite answers. Weighted by dish reach — butter up 20% at one stall
+matters more than mace up 20%, and a flat average says they are the same.
+
+**One link for the client** (`/evento/<token>`). Menu, time, head count, every
+allergen, and a check of the booked menu against the diets they told you about.
+No account — the bride's mother is not getting a login. Ninety days, revocable,
+only the SHA-256 stored.
+
 ## A code on every box
 
 `/labels` prints one sticker per dish. The code resolves to `/carta/<id>` — a

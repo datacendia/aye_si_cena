@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { viewer } from "@/lib/session";
 import { loadCopy } from "@/lib/copy";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { publicMenu, publicDiets } from "@/lib/public";
 import { DIETS, DIET_LABEL, ALLERGENS, ALLERGEN_LABEL } from "@/lib/dietary";
 import { CATEGORY_LABEL, CATEGORY_ORDER } from "@/lib/dishes";
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
 export default async function CartaPage() {
   if (await viewer()) redirect("/find");
 
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
   const dishes = await publicMenu(locale);
   const dietsByDish = await publicDiets();

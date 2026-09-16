@@ -3,7 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { viewer } from "@/lib/session";
 import { loadCopy } from "@/lib/copy";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { publicPackages } from "@/lib/public";
 import { WHATSAPP_HREF } from "../contact";
 
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export default async function PaquetesPage() {
   if (await viewer()) redirect("/packages");
 
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
   const packages = await publicPackages(locale);
   const es = locale === "es";

@@ -276,6 +276,100 @@ const verdict = (await page.locator('[aria-live="polite"]').innerText()).split("
 
 /* ─────────────────────── the admin, and that it lands ───────────────── */
 
+/* ───────────── did it pay, and the link you send the client ───────────── */
+
+console.log("\n/postmortem");
+await page.goto(`${BASE}/postmortem`, { waitUntil: "networkidle" });
+
+const events = await page.locator("button[aria-expanded]").count();
+events > 0 ? ok(`${events} past event(s) listed`) : no("no past events listed");
+
+if (events > 0) {
+  // Unrecorded events are listed too: they are the work list. A page showing
+  // only what somebody had already filled in would never remind anybody to.
+  has(await page.locator("body").innerText(), "Not recorded yet",
+    "events with nothing recorded are shown as the work list");
+
+  await page.locator("button[aria-expanded]").first().click();
+  await page.waitForSelector('input[name="foodSpend"]');
+  await page.fill('input[name="foodSpend"]', "1200");
+  await page.fill('input[name="staffSpend"]', "400");
+  await page.fill('input[name="guestsServed"]', "34");
+  await page.locator('form:has(input[name="foodSpend"]) button[type="submit"]').click();
+  await page.waitForTimeout(3000);
+
+  const recorded = await page.locator("body").innerText();
+  /\d+%/.test(recorded)
+    ? ok("a food-cost percentage comes back")
+    : no("no percentage after recording");
+
+  /*
+   * The client link, end to end: issue it here, open it on a context that has
+   * never held a cookie. That last part is the whole feature — the bride's
+   * mother is not getting a login.
+   */
+  const share = page.getByText(/Send this to the client|Enviar esto al cliente/).first();
+  if (await share.count() === 0) {
+    no("no way to share the booking with the client");
+  } else {
+    await share.click();
+    await page.waitForTimeout(3000);
+    const link = (await page.locator("body").innerText()).match(/https?:\/\/\S+\/evento\/\S+/);
+
+    if (!link) no("no client link was produced");
+    else {
+      ok("a client link was issued");
+      const stranger = await browser.newContext();
+      const guest = await stranger.newPage();
+      const res = await guest.goto(link[0].trim(), { waitUntil: "networkidle" });
+      const pack = await guest.locator("body").innerText();
+
+      res?.status() === 200 && !guest.url().includes("/login")
+        ? ok("the client opens it with no account at all")
+        : no("the client link redirects to the login");
+
+      /*
+       * Either language. A guest opening this has no cookie and no account, so
+       * readerLocale() falls to Spanish — which is correct for Lima and is the
+       * whole point of the default. Checking only the English asserted the
+       * verifier's own assumption rather than the page's behaviour.
+       */
+      /Contiene|Contains/i.test(pack)
+        ? ok("the pack declares the allergens")
+        : no(`the pack declares nothing — ${pack.slice(0, 120)}`);
+
+      /Ninguno|None of the/i.test(pack) || /Contiene|Contains/i.test(pack)
+        ? ok("every dish on the menu carries a declaration")
+        : no("some dishes carry no declaration");
+
+      await guest.setViewportSize({ width: 390, height: 844 });
+      await guest.reload({ waitUntil: "networkidle" });
+      const over = await guest.evaluate(() =>
+        document.documentElement.scrollWidth - document.documentElement.clientWidth);
+      over <= 1 ? ok("the pack fits a phone") : no(`the pack scrolls sideways by ${over}px`);
+
+      await stranger.close();
+    }
+  }
+}
+
+/* ───────────────────────── stalls and the kitchen scan ──────────────────── */
+
+console.log("\n/suppliers and /kitchen");
+await page.goto(`${BASE}/suppliers`, { waitUntil: "networkidle" });
+const stalls = await page.locator("body").innerText();
+has(stalls, "Surquillo", "the stall that sold you the price is named");
+
+await page.goto(`${BASE}/carta/7`, { waitUntil: "networkidle" });
+has(await page.locator("body").innerText(), "In the kitchen",
+  "a signed-in chef is offered the recipe from the guest's own page");
+
+await page.goto(`${BASE}/kitchen/7`, { waitUntil: "networkidle" });
+const kitchen = await page.locator("body").innerText();
+has(kitchen, "Method", "the kitchen page carries the method");
+has(kitchen, "Holds", "and how long it holds");
+has(kitchen, "Batch yields", "and the batch it is written for");
+
 console.log("\n/labels");
 await page.goto(`${BASE}/labels`, { waitUntil: "networkidle" });
 const sheet = await page.locator("body").innerText();
@@ -345,7 +439,7 @@ await page.waitForTimeout(2000);
 console.log("\n390px — no sideways scroll anywhere");
 await page.setViewportSize({ width: 390, height: 844 });
 const PAGES = [
-  "/panel", "/find", "/moments", "/menu", "/recipes", "/seasonal", "/compare",
+  "/panel", "/suppliers", "/postmortem", "/kitchen/7", "/find", "/moments", "/menu", "/recipes", "/seasonal", "/compare",
   "/graph", "/packages", "/builder", "/quotes", "/clients", "/bookings",
   "/prices", "/take", "/propose", "/engineering", "/admin", "/account"
 ];

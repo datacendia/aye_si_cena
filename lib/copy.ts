@@ -549,6 +549,97 @@ export const COPY: Record<string, Phrase> = {
   "labels.scanToRead": { en: "Scan to read", es: "Escanee para leer", section: "labels" },
   "nav.labels": { en: "Box labels", es: "Etiquetas", section: "nav" },
 
+  /* ── the kitchen's own scan ── */
+  "kitchen.heading": { en: "In the kitchen", es: "En la cocina", section: "kitchen" },
+  "kitchen.forBooking": { en: "Scaled for", es: "Escalado para", section: "kitchen" },
+  "kitchen.yields": { en: "Batch yields", es: "El lote rinde", section: "kitchen" },
+  "kitchen.batches": { en: "batches", es: "lotes", section: "kitchen" },
+  "kitchen.holds": { en: "Holds", es: "Aguanta", section: "kitchen" },
+  "kitchen.method": { en: "Method", es: "Método", section: "kitchen" },
+  "kitchen.prep": { en: "Prep", es: "Preparación", section: "kitchen" },
+  "kitchen.cook": { en: "Cook", es: "Cocción", section: "kitchen" },
+  "kitchen.minutes": { en: "min", es: "min", section: "kitchen" },
+  "kitchen.asGuestSees": {
+    en: "What the guest sees when they scan this",
+    es: "Lo que ve el invitado al escanear esto", section: "kitchen" },
+  "kitchen.noRecipe": {
+    en: "No recipe written for this one yet.",
+    es: "Todavía no hay receta escrita para este.", section: "kitchen" },
+  "kitchen.pickBooking": {
+    en: "Pick a booking to scale the quantities.",
+    es: "Elija una reserva para escalar las cantidades.", section: "kitchen" },
+
+  /* ── the link you send a client ── */
+  "pack.heading": { en: "Your event", es: "Su evento", section: "pack" },
+  "pack.menu": { en: "The menu", es: "El menú", section: "pack" },
+  "pack.when": { en: "When", es: "Cuándo", section: "pack" },
+  "pack.where": { en: "Where", es: "Dónde", section: "pack" },
+  "pack.guests": { en: "Guests", es: "Invitados", section: "pack" },
+  "pack.service": { en: "Food on the table at", es: "Comida en la mesa a las", section: "pack" },
+  "pack.allergens": { en: "What is in it", es: "Qué lleva", section: "pack" },
+  "pack.allergensLede": {
+    en: "Every dish on your menu, with its declarable allergens. Read off the recipe, not typed by hand. Scan any box on the day for the same answer.",
+    es: "Cada plato de su menú, con sus alérgenos declarables. Leído de la receta, no escrito a mano. Escanee cualquier caja el día del evento para la misma respuesta.",
+    section: "pack" },
+  "pack.diets": { en: "What you told us", es: "Lo que nos dijeron", section: "pack" },
+  "pack.dietsClash": {
+    en: "These dishes are not suitable for a diet on your record. Tell us and we will swap them.",
+    es: "Estos platos no son aptos para una dieta de su registro. Avísenos y los cambiamos.",
+    section: "pack" },
+  "pack.total": { en: "Agreed", es: "Acordado", section: "pack" },
+  "pack.igvIncluded": { en: "IGV included", es: "IGV incluido", section: "pack" },
+  "pack.questions": { en: "Anything to change?", es: "¿Algo que cambiar?", section: "pack" },
+  "pack.gone": {
+    en: "This link has expired. Ask us for a new one.",
+    es: "Este enlace venció. Pídanos uno nuevo.", section: "pack" },
+  "pack.share": { en: "Send this to the client", es: "Enviar esto al cliente", section: "pack" },
+  "pack.shareLede": {
+    en: "One link with the menu, the time, the head count and every allergen. It replaces the eleven WhatsApp messages before each event. Long-lived, revocable, and only its SHA-256 is stored.",
+    es: "Un enlace con el menú, la hora, la cantidad y cada alérgeno. Reemplaza los once mensajes de WhatsApp antes de cada evento. Dura, se puede revocar, y solo se guarda su SHA-256.",
+    section: "pack" },
+  "pack.revoke": { en: "Revoke", es: "Revocar", section: "pack" },
+  "pack.copyOnce": {
+    en: "Copy this now — it is shown once.",
+    es: "Cópielo ahora — se muestra una vez.", section: "pack" },
+
+  /* ── suppliers ── */
+  "sup.heading": { en: "Your stalls", es: "Sus puestos", section: "sup" },
+  "sup.lede": {
+    en: "Every verified price records where it was bought. Read back by stall, that answers a different question from the price page: not what is rising, but who is putting it up. A market problem you absorb; a supplier problem you walk across the aisle about.",
+    es: "Cada precio verificado registra dónde se compró. Leído por puesto, responde otra pregunta: no qué está subiendo, sino quién lo está subiendo. Un problema de mercado se absorbe; un problema de proveedor se conversa cruzando el pasillo.",
+    section: "sup" },
+  "sup.tracked": { en: "ingredients tracked", es: "ingredientes seguidos", section: "sup" },
+  "sup.perMonth": { en: "per month", es: "al mes", section: "sup" },
+  "sup.worst": { en: "Worst", es: "Lo peor", section: "sup" },
+  "sup.falling": { en: "falling", es: "bajando", section: "sup" },
+  "sup.needTwo": {
+    en: "Record the stall on a price twice and this page starts answering.",
+    es: "Registre el puesto en un precio dos veces y esta página empieza a responder.",
+    section: "sup" },
+  "sup.thin": { en: "thin evidence", es: "evidencia escasa", section: "sup" },
+
+  /* ── what it really cost ── */
+  "pm.heading": { en: "Did it make money?", es: "¿Dejó dinero?", section: "pm" },
+  "pm.lede": {
+    en: "Every margin in this app is modelled — the food cost from the recipe, the service from the tier's rules. Neither is a receipt. Put what you actually spent beside what you quoted and the gap tells you which is wrong: the model, or the kitchen.",
+    es: "Todo margen en esta app es un modelo — el costo de la comida sale de la receta, el servicio de las reglas del nivel. Ninguno es una boleta. Ponga lo que gastó de verdad junto a lo que cotizó y la diferencia dice cuál está mal: el modelo o la cocina.",
+    section: "pm" },
+  "pm.quoted": { en: "Quoted", es: "Cotizado", section: "pm" },
+  "pm.spent": { en: "Spent", es: "Gastado", section: "pm" },
+  "pm.left": { en: "Left", es: "Quedó", section: "pm" },
+  "pm.foodCost": { en: "food cost", es: "costo de comida", section: "pm" },
+  "pm.gap": { en: "against quote", es: "contra lo cotizado", section: "pm" },
+  "pm.notRecorded": { en: "Not recorded yet", es: "Aún sin registrar", section: "pm" },
+  "pm.record": { en: "Record it", es: "Registrar", section: "pm" },
+  "pm.saved": { en: "Recorded", es: "Registrado", section: "pm" },
+  "pm.nothingPast": {
+    en: "No events have happened yet.",
+    es: "Todavía no ha pasado ningún evento.", section: "pm" },
+  "pm.servedNot": { en: "served, not", es: "servidos, no", section: "pm" },
+
+  "nav.suppliers": { en: "Stalls", es: "Puestos", section: "nav" },
+  "nav.postmortem": { en: "Did it pay?", es: "¿Dejó?", section: "nav" },
+
   "pub.staffOnly": {
     en: "Costs, recipes and quotes are behind the sign-in.",
     es: "Costos, recetas y cotizaciones están detrás del acceso.", section: "public" }

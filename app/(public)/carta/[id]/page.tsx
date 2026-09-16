@@ -2,11 +2,14 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { loadCopy, allergenLabel, dietLabel, categoryLabel } from "@/lib/copy";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { publicMenu, publicDiets } from "@/lib/public";
 import { ALLERGEN_LABEL, DIET_LABEL } from "@/lib/dietary";
 import { CATEGORY_LABEL } from "@/lib/dishes";
 import { WHATSAPP_HREF } from "../../contact";
+import { noteDeclaration } from "@/lib/repo/declarations";
+import { viewer } from "@/lib/session";
+import { CAN } from "@/lib/permissions";
 
 /**
  * Where a QR code on a box lands.
@@ -30,7 +33,7 @@ export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
 ): Promise<Metadata> {
   const { id } = await params;
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const dish = (await publicMenu(locale)).find((d) => String(d.id) === id);
   if (!dish) return { title: "—" };
 
@@ -44,13 +47,39 @@ export async function generateMetadata(
 
 export default async function DishPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const locale = await publicLocale();
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
 
   const dish = (await publicMenu(locale)).find((d) => String(d.id) === id);
   if (!dish) notFound();
 
   const suits = (await publicDiets())[dish.id] ?? [];
+
+  /*
+   * A signed-in chef scanning this box gets the guest's page, not a redirect.
+   *
+   * They scanned it to check something a guest asked them, so the guest's words
+   * are the right answer — and being bounced to a recipe would be the wrong
+   * one. The recipe is one tap away instead.
+   */
+  const me = await viewer();
+  const kitchen = me && CAN.seeKitchen(me.role);
+
+  /*
+   * Record what this scan was shown.
+   *
+   * On read rather than on print, because the moment somebody was actually told
+   * something is the moment worth writing down — a label printed and never
+   * scanned told nobody anything. Identical declarations collapse onto one row,
+   * so this is one upsert per distinct wording, not one per scan.
+   *
+   * It cannot fail the page: lib/repo/declarations.ts swallows its own errors.
+   * A guest checking a box for nuts must see the answer even if the database is
+   * asleep.
+   */
+  await noteDeclaration({
+    dishId: dish.id, name: dish.name, allergens: dish.allergens, suits
+  });
 
   return (
     <article className="mx-auto max-w-2xl py-10">
@@ -136,6 +165,17 @@ export default async function DishPage({ params }: { params: Promise<{ id: strin
         {t("dish.readFromRecipe")}
       </p>
       <p className="mt-3 text-[13px] text-ink-3">{t("dish.notAnAudit")}</p>
+
+      {kitchen && (
+        <p className="mt-8 rounded-lg border border-thistle/40 bg-thistle/5 p-3">
+          <Link
+            href={`/kitchen/${dish.id}`}
+            className="text-sm font-bold text-thistle underline hover:text-ink"
+          >
+            {t("kitchen.heading")} →
+          </Link>
+        </p>
+      )}
 
       <div className="mt-8 flex flex-wrap gap-3">
         <Link

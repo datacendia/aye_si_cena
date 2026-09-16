@@ -5,7 +5,7 @@ import { CAN } from "@/lib/permissions";
 import { logout } from "./login/actions";
 import { setLocale } from "./admin/actions";
 import { setPublicLocale } from "./(public)/actions";
-import { publicLocale } from "@/lib/public-locale";
+import { readerLocale } from "@/lib/public-locale";
 import { loadCopy } from "@/lib/copy";
 import type { Role } from "@/db/schema";
 import { Fraunces, Karla, IBM_Plex_Mono } from "next/font/google";
@@ -58,11 +58,13 @@ const NAV: { href: string; key: string; needs?: (r: Role) => boolean }[] = [
   { href: "/propose", key: "nav.propose", needs: CAN.writeQuotes },
   { href: "/quotes", key: "nav.quotes", needs: CAN.writeQuotes },
   { href: "/engineering", key: "nav.engineering", needs: CAN.seeMoney },
+  { href: "/postmortem", key: "nav.postmortem", needs: CAN.seeMoney },
   { href: "/clients", key: "nav.clients", needs: CAN.manageClients },
   { href: "/bookings", key: "nav.bookings", needs: CAN.writeBookings },
   { href: "/take", key: "nav.take", needs: CAN.seeKitchen },
   { href: "/labels", key: "nav.labels", needs: CAN.seeKitchen },
   { href: "/prices", key: "nav.prices", needs: CAN.writePrices },
+  { href: "/suppliers", key: "nav.suppliers", needs: CAN.writePrices },
   { href: "/admin", key: "nav.admin", needs: CAN.manageClients },
   { href: "/account", key: "nav.account" }
 ];
@@ -84,8 +86,8 @@ const PUBLIC_NAV = [
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const me = await viewer();
   const links = me ? NAV.filter((n) => !n.needs || n.needs(me.role)) : PUBLIC_NAV;
-  // A stranger has no user row, so their language lives in a cookie.
-  const locale = me?.locale ?? (await publicLocale());
+  // The account wins where there is one; a stranger's choice lives in a cookie.
+  const locale = await readerLocale();
   const t = await loadCopy(locale);
 
   return (

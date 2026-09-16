@@ -10,6 +10,17 @@ A Next.js app and a single-file HTML menu, built from one spreadsheet.
 event in Lima — IGV at 18%, transport by district and hour, the liquor
 *giro especial*, and the *vedas*, the legal closed seasons for fish.
 
+## Public pages and language
+
+Every page under `app/(public)/` must call `readerLocale()`, never
+`publicLocale()`. A signed-in person has a locale on their user row; reading the
+cookie for them renders an English header over a Spanish body. A test enforces
+it.
+
+Public pages may import exactly three repositories: `repo/menu` (via
+lib/public.ts), `repo/pack` (the token read) and `repo/declarations` (a write).
+Nothing else.
+
 ## The box labels
 
 `/labels` → QR → `/carta/<id>`, public, allergens derived from the recipe.
