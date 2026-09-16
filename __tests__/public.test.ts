@@ -117,7 +117,14 @@ const publicFiles = pagesUnder(PUBLIC_DIR).map((f) => ({
 
 describe("the shop window reaches nothing it should not", () => {
   it("has pages to check", () => {
-    expect(publicFiles.length).toBeGreaterThanOrEqual(4);
+    expect(publicFiles.length).toBeGreaterThanOrEqual(5);
+  });
+
+  it("includes the page a QR code on a box lands on", () => {
+    // The one page whose reader is holding food. A guest has no account and
+    // never will, so requiring one would make the label decorative.
+    expect(publicFiles.some((f) => f.rel.includes("carta") && f.rel.includes("[id]")))
+      .toBe(true);
   });
 
   it("imports no dish data, no repository and no session guard", () => {
@@ -152,9 +159,23 @@ describe("the shop window reaches nothing it should not", () => {
   });
 
   it("sends signed-in staff to their own version of each page", () => {
-    // Not for secrecy — for usefulness. A chef landing on the customer menu has
-    // lost the recipes; the redirect puts them where their tools are.
+    /*
+     * Not for secrecy — for usefulness. A chef landing on the customer menu has
+     * lost the recipes; the redirect puts them where their tools are.
+     *
+     * /carta/[id] is the exception and the reason is worth stating: it is the
+     * page a QR code on a box lands on, and it has no staff equivalent because
+     * it IS the declaration. A chef scanning a box at 6am to check whether it
+     * contains celery should see exactly what the guest sees — the same words,
+     * off the same recipe. Bouncing them somewhere else would defeat the label.
+     */
+    const noStaffVersion = [`carta${sep}[id]`];
+
     for (const f of publicFiles.filter((x) => x.rel.endsWith(`${sep}page.tsx`))) {
+      if (noStaffVersion.some((x) => f.rel.includes(x))) {
+        expect(f.src).not.toMatch(/redirect\(/);
+        continue;
+      }
       expect(f.src).toMatch(/if \(await viewer\(\)\) redirect\(/);
     }
   });

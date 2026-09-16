@@ -221,14 +221,24 @@ describe("the outer gate is deny-by-default", () => {
    * A gate entry with no page behind it is the opposite failure: a door
    * somebody opened and forgot to close.
    */
-  it("opens exactly the pages in app/(public)/, and no others", () => {
+  it("opens every page in app/(public)/, and nothing beyond them", () => {
     const shopWindow = found
       .filter((p) => isPublic(p.file))
       .map((p) => p.route.replace(/\/\(public\)/g, "") || "/")
       .sort();
 
-    const opened = gateOpens().filter((e) => !["/login", "/api/auth", "/reset"].includes(e)).sort();
-    expect(opened).toEqual(shopWindow);
+    const opened = gateOpens().filter((e) => !["/login", "/api/auth", "/reset"].includes(e));
+
+    // Reachable, not individually listed: the gate matches whole segments, so
+    // "/carta" opens "/carta/[id]" too — which is what a QR code on a box needs.
+    const reachable = (route: string) =>
+      opened.some((e) => route === e || route.startsWith(`${e}/`));
+
+    expect(shopWindow.filter((r) => !reachable(r))).toEqual([]);
+
+    // And nothing is opened that has no page behind it.
+    const orphans = opened.filter((e) => !shopWindow.some((r) => r === e || r.startsWith(`${e}/`)));
+    expect(orphans).toEqual([]);
   });
 
   it("matches on whole path segments, so /carta does not open /cartagena", () => {

@@ -297,6 +297,26 @@ The counters live in a table rather than in memory because the app runs in
 Netlify functions, where each request may be a fresh process and an in-memory
 counter would reset itself and protect nothing.
 
+## A code on every box
+
+`/labels` prints one sticker per dish. The code resolves to `/carta/<id>` — a
+public page carrying that dish's declarable allergens and the diets it suits,
+generated from the recipe by `lib/dietary.ts`. **Nobody writes the card**, which
+is the entire point: 135 of the 223 dishes carry three or more of the fourteen
+declarables, and a card hand-written at 6am by whoever is packing is wrong
+sooner or later.
+
+Pick a booking to print only that event's dishes. It needs `AUTH_URL` set — the
+code has to carry an absolute address — and the page refuses to pretend
+otherwise if it is missing.
+
+The codes are not trusted because a library made them. `__tests__/labels.test.ts`
+rasterises **all 223** and decodes them with a different library (`jsQR`); the
+text that comes back has to be the URL that went in. Measured tolerances, found
+by sweeping until they broke rather than chosen to pass: they decode from a
+**37-pixel image**, with **no quiet zone at all**, and from a print faded to
+**mid-grey ink**.
+
 ## Five tiers
 
 | | min | dishes | typical, IGV in |

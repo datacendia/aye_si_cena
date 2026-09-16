@@ -10,6 +10,13 @@ A Next.js app and a single-file HTML menu, built from one spreadsheet.
 event in Lima — IGV at 18%, transport by district and hour, the liquor
 *giro especial*, and the *vedas*, the legal closed seasons for fish.
 
+## The box labels
+
+`/labels` → QR → `/carta/<id>`, public, allergens derived from the recipe.
+Codes are drawn from a module matrix as real SVG elements — **not**
+`dangerouslySetInnerHTML`; this repository holds zero of those. Every code is
+decode-tested with a second library.
+
 ## Five service tiers
 
 `ninos` (Wee Feast), `scran`, `buffet`, `plated`, `ceilidh` (The Ceilidh Table).

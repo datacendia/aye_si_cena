@@ -75,7 +75,7 @@ console.log("the shop window, signed out");
 
   const { DISHES } = await import("../.verify-dishes.mjs").catch(() => ({ DISHES: null }));
 
-  for (const path of ["/", "/carta", "/paquetes", "/eventos"]) {
+  for (const path of ["/", "/carta", "/paquetes", "/eventos", "/carta/7"]) {
     const res = await visitor.goto(BASE + path, { waitUntil: "networkidle" });
     const url = visitor.url();
 
@@ -127,6 +127,16 @@ console.log("the shop window, signed out");
       : no(`${path} OPENED for a stranger`);
   }
 
+  /*
+   * The page a QR code on a box lands on. A guest holding a canapé has no
+   * account and never will, so if this needs one the label is decorative.
+   */
+  await visitor.goto(`${BASE}/carta/7`, { waitUntil: "networkidle" });
+  const declaration = await visitor.locator("body").innerText();
+  /Contiene|Contains|declarables/i.test(declaration)
+    ? ok("/carta/<id> declares the allergens to a stranger")
+    : no("/carta/<id> shows no declaration");
+
   // The reset page must be reachable without a session — a spent token is the
   // right answer here; a redirect to /login is not.
   await visitor.goto(`${BASE}/reset/not-a-real-token`, { waitUntil: "networkidle" });
@@ -136,7 +146,7 @@ console.log("the shop window, signed out");
 
   // And on a phone, which is where a WhatsApp link is opened.
   await visitor.setViewportSize({ width: 390, height: 844 });
-  for (const path of ["/", "/carta", "/paquetes", "/eventos"]) {
+  for (const path of ["/", "/carta", "/paquetes", "/eventos", "/carta/7"]) {
     await visitor.goto(BASE + path, { waitUntil: "networkidle" });
     const over = await visitor.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -265,6 +275,29 @@ const verdict = (await page.locator('[aria-live="polite"]').innerText()).split("
   : no(`no verdict: ${verdict}`);
 
 /* ─────────────────────── the admin, and that it lands ───────────────── */
+
+console.log("\n/labels");
+await page.goto(`${BASE}/labels`, { waitUntil: "networkidle" });
+const sheet = await page.locator("body").innerText();
+has(sheet, "Box labels", "the label sheet renders");
+
+const codes = await page.locator(".label svg").count();
+codes > 100
+  ? ok(`${codes} codes drawn`)
+  : no(`only ${codes} codes drawn`);
+
+// Drawn as real elements, not injected markup — this repository holds zero
+// dangerouslySetInnerHTML and a page that prints is the wrong place to start.
+const rects = await page.locator(".label svg rect").count();
+rects > codes
+  ? ok("each code is drawn from its module matrix")
+  : no("the codes are not drawn as elements");
+
+if (sheet.includes("AUTH_URL is not set")) {
+  no("every code points at nothing — AUTH_URL is unset");
+} else {
+  ok("the codes carry a real address");
+}
 
 console.log("\n/admin");
 await page.goto(`${BASE}/admin`, { waitUntil: "networkidle" });

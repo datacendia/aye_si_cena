@@ -517,6 +517,38 @@ export const COPY: Record<string, Phrase> = {
   "allg.pork": { en: "Pork", es: "Cerdo", section: "labels" },
   "allg.alcohol": { en: "Alcohol", es: "Alcohol", section: "labels" },
 
+  /* ── what a scan lands on ── */
+  "dish.declares": { en: "What is in this", es: "Qué lleva esto", section: "public" },
+  "dish.contains": { en: "Contains", es: "Contiene", section: "public" },
+  "dish.containsNone": {
+    en: "None of the 14 declarable allergens",
+    es: "Ninguno de los 14 alérgenos declarables", section: "public" },
+  "dish.suits": { en: "Suitable for", es: "Apto para", section: "public" },
+  "dish.made": { en: "Made from", es: "Hecho con", section: "public" },
+  "dish.readFromRecipe": {
+    en: "Read off the recipe by the same engine that prints the kitchen's own sheets. Nobody types this card, which is the point of it.",
+    es: "Leído de la receta por el mismo motor que imprime las hojas de la cocina. Nadie escribe esta ficha a mano, y ese es el punto.",
+    section: "public" },
+  "dish.notAnAudit": {
+    en: "This is not a legal allergen audit. We cook in one kitchen, so we cannot promise a dish has never been near an ingredient that is not listed. If somebody at your table reacts severely, tell us before the date and we will handle it separately.",
+    es: "Esto no es una auditoría legal de alérgenos. Cocinamos en una sola cocina, así que no podemos prometer que un plato nunca estuvo cerca de un ingrediente que no figura. Si alguien en su mesa reacciona de forma severa, avísenos antes de la fecha y lo manejamos aparte.",
+    section: "public" },
+  "dish.backToMenu": { en: "The whole menu", es: "La carta completa", section: "public" },
+  "dish.licence": {
+    en: "Contains alcohol.", es: "Contiene alcohol.", section: "public" },
+
+  /* ── the printable label sheet ── */
+  "labels.heading": { en: "Box labels", es: "Etiquetas de caja", section: "labels" },
+  "labels.lede": {
+    en: "One label per dish. The code resolves to the allergen declaration, generated from the recipe — so the card on the box cannot disagree with the food in it. Print, cut, stick.",
+    es: "Una etiqueta por plato. El código lleva a la declaración de alérgenos, generada desde la receta — así la ficha de la caja no puede contradecir la comida que lleva. Imprima, corte, pegue.",
+    section: "labels" },
+  "labels.print": { en: "Print", es: "Imprimir", section: "labels" },
+  "labels.forEvent": { en: "For a booking", es: "Para una reserva", section: "labels" },
+  "labels.wholeMenu": { en: "The whole menu", es: "La carta completa", section: "labels" },
+  "labels.scanToRead": { en: "Scan to read", es: "Escanee para leer", section: "labels" },
+  "nav.labels": { en: "Box labels", es: "Etiquetas", section: "nav" },
+
   "pub.staffOnly": {
     en: "Costs, recipes and quotes are behind the sign-in.",
     es: "Costos, recetas y cotizaciones están detrás del acceso.", section: "public" }
