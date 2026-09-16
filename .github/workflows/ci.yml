@@ -62,6 +62,15 @@ jobs:
       - name: The file you send a client has nothing in it
         run: npm run standalone:client
 
+      # Neon's free tier suspends an idle database and free tiers have outages.
+      # When that happens the quotes and recipes can wait; the page a customer
+      # found on Instagram cannot. This starts the app with DATABASE_URL unset
+      # and checks the whole shop window still renders.
+      - name: The shop window survives the database being away
+        run: npm run verify:nodb
+        env:
+          AUTH_SECRET: build-only-not-a-real-secret
+
   audit:
     name: Dependency advisories
     runs-on: ubuntu-latest

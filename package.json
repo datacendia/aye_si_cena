@@ -26,7 +26,8 @@
     "market-run:es": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/build-market-run.mjs --lang es",
     "backup": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/backup.mjs",
     "restore": "node --experimental-strip-types --import ./scripts/ts-alias.mjs scripts/restore.mjs",
-    "verify:app": "node scripts/prep-verify.mjs && node scripts/verify-app.mjs"
+    "verify:app": "node scripts/prep-verify.mjs && node scripts/verify-app.mjs",
+    "verify:nodb": "node scripts/verify-no-db.mjs"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.11.3",

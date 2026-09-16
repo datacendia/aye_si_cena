@@ -26,7 +26,7 @@ function sources(dir: string, out: string[] = []): string[] {
 const RUNTIME_ONLY = new Set(["NODE_ENV", "NODE_OPTIONS", "PORT", "CI"]);
 
 /** Set by the person running a verifier, not by the deployment. */
-const TOOLING = new Set(["VERIFY_EMAIL", "VERIFY_PASSWORD", "APP_URL"]);
+const TOOLING = new Set(["VERIFY_EMAIL", "VERIFY_PASSWORD", "APP_URL", "NODB_PORT"]);
 
 describe(".env.example", () => {
   const used = new Set<string>();

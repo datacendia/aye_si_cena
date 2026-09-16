@@ -306,6 +306,10 @@ anybody. It carries the 223 dishes with their allergens and diets, three
 packages with a per-guest figure to start from, and a WhatsApp link. It carries
 no cost, no supplier, no margin, no recipe and no per-dish price.
 
+The shop window needs **no database at all** — it is checked that way in CI.
+Neon's free tier suspends an idle database, and when it does the quotes and the
+recipes can wait; the page a customer found on Instagram cannot.
+
 **Everything else** is behind the login: the matrix, the recipes, the quotes,
 the clients, the bookings, the verified prices, the admin. Signing in lands you
 on `/panel`.
@@ -328,6 +332,7 @@ npm run validate           # typecheck, lint, 770 tests
 npm run verify:standalone  # the single file, driven in Chromium
 npm run standalone:client  # the client file, read byte by byte for leaks
 npm run verify:app         # the app itself, signed in, in Chromium
+npm run verify:nodb        # the shop window with DATABASE_URL unset
 ```
 
 `verify:app` needs the app running and an owner to sign in as:
