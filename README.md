@@ -297,6 +297,33 @@ The counters live in a table rather than in memory because the app runs in
 Netlify functions, where each request may be a fresh process and an in-memory
 counter would reset itself and protect nothing.
 
+## Five tiers
+
+| | min | dishes | typical, IGV in |
+|---|---|---|---|
+| Wee Feast — children's party | 10 | 72 | S/ 70–85 |
+| Scran Boxes | 8 | 125 | S/ 95–110 |
+| Two Shores Buffet | 20 | 211 | S/ 130–150 |
+| The Aye Si Plated Experience | 20 | 223 | S/ 160–185 |
+| The Ceilidh Table | 12 | 223 | S/ 250–280 |
+
+Three of them come from the spreadsheet's `tiers` column. Two are derived by
+rule in `lib/tiers.ts`, because two more hand-maintained columns across 223 rows
+is two more columns that go stale — this repository has shipped one of those
+before and it disagreed with its own recipes on 165 dishes.
+
+**Wee Feast** is kid-friendly box food per `lib/dietary.ts` with *no alcohol in
+it at all*. That rule is absolute and separate from the licence question:
+cooking with alcohol is legal without the *giro especial*, but nothing
+containing it goes to a room of eight-year-olds. Tested against all 223.
+
+**The Ceilidh Table** carries anything that can be plated — the top tier is not
+a narrower menu, it is a longer one with more people serving it.
+
+The names are placeholders in one string each, in `lib/pricing.ts`. So are the
+staffing ratios and minimums; change them there and every quote, every package
+card and the standalone move together.
+
 ### Who can see what
 
 There are two sites here, on one deployment.

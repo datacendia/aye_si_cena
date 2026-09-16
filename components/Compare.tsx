@@ -4,14 +4,18 @@ import { useMemo, useState } from "react";
 import type { Dish, ServiceTier } from "@/lib/dishes";
 import { buildQuote, TIERS, soles } from "@/lib/pricing";
 
-const TIER_IDS: ServiceTier[] = ["scran", "buffet", "plated"];
+/** Cheapest first, so the columns read as a ladder. */
+const TIER_IDS: ServiceTier[] = ["ninos", "scran", "buffet", "plated", "ceilidh"];
 
 /**
  * The Compare port, used commercially: one guest count, the same intent,
  * costed across all three tiers so a client sees what the money buys rather
  * than being told.
  */
-export default function Compare({ dishes }: { dishes: Dish[] }) {
+export default function Compare(
+  /** Dish ids per tier, resolved on the server — see lib/tiers.ts. */
+  { dishes, eligible }: { dishes: Dish[]; eligible: Record<string, number[]> }
+) {
   const [guests, setGuests] = useState(30);
 
   // A representative menu per tier: the cheapest-margin dishes available at
@@ -19,7 +23,7 @@ export default function Compare({ dishes }: { dishes: Dish[] }) {
   const menus = useMemo(() => {
     const out = {} as Record<ServiceTier, Dish[]>;
     for (const tier of TIER_IDS) {
-      const pool = dishes.filter((d) => d.tiers.includes(tier));
+      const pool = dishes.filter((d) => (eligible[tier] ?? []).includes(d.id));
       const picked: Dish[] = [];
       for (const cat of ["canape", "main", "side", "dessert"] as const) {
         const best = pool

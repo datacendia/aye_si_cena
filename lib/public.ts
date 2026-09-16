@@ -85,8 +85,16 @@ export interface PublicPackage {
   includes: { en: string; es: string }[];
   minGuests: number;
   bitesPerGuest: number;
-  /** Indicative per-guest price including IGV, rounded up to a round number. */
+  /**
+   * Indicative per-guest price including IGV, rounded to a round number.
+   *
+   * `from` is a realistic entry menu, not the cheapest one that can be
+   * assembled. `typical` is the middle of the range. Both matter: a range says
+   * "this is a real conversation", a single floor says "this is what it costs"
+   * and it is then the number every negotiation starts from.
+   */
   fromPerGuest: number;
+  typicalPerGuest: number;
   /** Dishes available at this tier. */
   dishes: number;
 }
@@ -94,48 +102,89 @@ export interface PublicPackage {
 /**
  * What each tier comes to per head, worked out rather than asserted.
  *
- * The figure is built by running lib/pricing.ts over a real, plausible event —
- * the cheaper half of the dishes eligible at that tier, at twice the tier
- * minimum, delivered to a mid-distance district off-peak — and then rounded UP
- * to the nearest S/5. Rounding up matters: a "from" price a caterer then has to
- * exceed on every single quote is worse than no price at all.
+ * The first version of this took the cheapest half of the eligible dishes and
+ * called the result "from". It was arithmetically correct and commercially
+ * wrong: it advertised S/75 for a plated service whose mid-range menu prices at
+ * S/177 and whose top end is close to S/500. Nobody would have been quoted S/75
+ * and every conversation would have started from it.
  *
- * It is gross, because a guest asking "how much per person" is not asking for a
- * figure they then have to add 18% to.
+ * So two figures, both from real menus run through lib/pricing.ts:
  *
- * The dish costs used to get there never leave the server. Only the rounded
- * per-guest number is rendered.
+ *   from     the 25th percentile of the eligible dishes by menu value — the
+ *            cheapest menu somebody would actually be sent, not the cheapest
+ *            that can be assembled.
+ *   typical  the median. This is the number that describes the business.
+ *
+ * Both at twice the tier minimum, in a mid-distance district, off-peak, and
+ * gross — a guest asking "how much per person" is not asking for a figure they
+ * then add 18% to. `from` rounds DOWN and `typical` rounds UP, to the nearest
+ * S/5, so the range printed is never narrower than the range priced.
+ *
+ * The dish costs used to get there never leave the server. Only the two rounded
+ * per-guest numbers are rendered.
  */
 export async function publicPackages(locale: Locale = "es"): Promise<PublicPackage[]> {
   const { TIERS, buildQuote, IGV_RATE } = await import("./pricing");
   const { DISTRICTS, VENUE_TYPES } = await import("@/data/venues");
+  const { dishesForTier } = await import("./tiers");
+  const { RECIPES } = await import("@/data/recipes");
   const all = await menu(locale);
 
   const district = DISTRICTS.find((d) => d.id === "miraflores");
   const venue = VENUE_TYPES.find((v) => v.id === "house");
 
   return Object.values(TIERS).map((tier) => {
-    const eligible = all.filter((d) => d.tiers.includes(tier.id));
+    const eligible = dishesForTier(all, tier.id, RECIPES);
     const guests = tier.minGuests * 2;
-
-    // The cheaper half, so the "from" is a price somebody can actually be
-    // quoted rather than the cheapest dish on the menu repeated six times.
     const byValue = [...eligible].sort((a, b) => a.price - b.price);
-    const chosen = byValue.slice(0, Math.max(1, Math.ceil(byValue.length / 2)))
-      .slice(0, tier.bitesPerGuest);
 
-    let fromPerGuest = 0;
-    if (chosen.length > 0) {
-      const quote = buildQuote({ dishes: chosen, guests, tier: tier.id, district, venue, peak: false });
-      fromPerGuest = Math.ceil((quote.netPerGuest * (1 + IGV_RATE)) / 5) * 5;
-    }
+    /**
+     * A menu shaped the way somebody would actually order it.
+     *
+     * lib/pricing.ts counts canapés as bites — `bitesPerGuest` pieces spread
+     * across whichever canapés are chosen — but every other category as one
+     * full portion per guest. So "the six dishes at the 25th percentile" is not
+     * a cheap menu, it is six main courses each, and the figure it produced was
+     * nonsense in both directions: it made the children's boxes dearer than the
+     * adult ones and it put the top tier's median below its own floor.
+     *
+     * A real menu is canapés plus a plate or two. PLATES below says which, per
+     * tier, and both figures are built the same way from different points in
+     * the price list — so the range compares like with like.
+     */
+    const menuAt = (percentile: number) => {
+      const from = (pool: typeof byValue, n: number) => {
+        const start = Math.min(Math.floor(pool.length * percentile), Math.max(0, pool.length - n));
+        return pool.slice(start, start + n);
+      };
+
+      const canapes = byValue.filter((d) => d.category === "canape");
+      const chosen = [...from(canapes, 3)];
+
+      for (const category of PLATES[tier.id] ?? []) {
+        chosen.push(...from(byValue.filter((d) => d.category === category), 1));
+      }
+      return chosen.length > 0 ? chosen : byValue.slice(0, 1);
+    };
+
+    const perGuest = (dishes: typeof byValue) =>
+      dishes.length === 0
+        ? 0
+        : buildQuote({ dishes, guests, tier: tier.id, district, venue, peak: false })
+            .netPerGuest * (1 + IGV_RATE);
+
+    const low = perGuest(menuAt(0.25));
+    const mid = perGuest(menuAt(0.5));
 
     return {
       id: tier.id,
       name: tier.name,
       minGuests: tier.minGuests,
       bitesPerGuest: tier.bitesPerGuest,
-      fromPerGuest,
+      // Down for the floor, up for the middle: the printed range is never
+      // narrower than the priced one.
+      fromPerGuest: low > 0 ? Math.floor(low / 5) * 5 : 0,
+      typicalPerGuest: mid > 0 ? Math.ceil(mid / 5) * 5 : 0,
       dishes: eligible.length,
       includes: TIER_INCLUDES[tier.id] ?? []
     };
@@ -150,7 +199,29 @@ export async function publicPackages(locale: Locale = "es"): Promise<PublicPacka
  * deliberately — one is a number that moves with a supplier, the other is a
  * promise.
  */
+/**
+ * What sits on the plate beside the canapés, per tier.
+ *
+ * Empty for the box tiers: a box is bites, and the engine already counts those
+ * as `bitesPerGuest` pieces however many kinds go in it. The served tiers add
+ * one full portion per category named here, which is what "a main and a
+ * pudding" costs.
+ */
+const PLATES: Record<string, string[]> = {
+  ninos: [],
+  scran: [],
+  buffet: ["main"],
+  plated: ["main", "dessert"],
+  ceilidh: ["main", "dessert"]
+};
+
 const TIER_INCLUDES: Record<string, { en: string; es: string }[]> = {
+  ninos: [
+    { en: "Individual boxes, nothing to heat, nothing to plate", es: "Cajas individuales, nada que calentar, nada que servir" },
+    { en: "Not one dish contains alcohol", es: "Ningún plato contiene alcohol" },
+    { en: "Drawn only from dishes children actually eat", es: "Solo platos que los niños de verdad comen" },
+    { en: "Every allergen declared on the box, for the parents", es: "Cada alérgeno declarado en la caja, para los padres" }
+  ],
   scran: [
     { en: "Individual boxes, delivered cold or hot", es: "Cajas individuales, entregadas frías o calientes" },
     { en: "No staff, no hired china, no liquor licence needed", es: "Sin personal, sin vajilla alquilada, sin licencia de licores" },
@@ -162,6 +233,13 @@ const TIER_INCLUDES: Record<string, { en: string; es: string }[]> = {
     { en: "China, glassware and linen, hired and returned", es: "Vajilla, cristalería y mantelería, alquiladas y devueltas" },
     { en: "One chef on site", es: "Un chef en el local" },
     { en: "One floor server per 25 guests", es: "Un mozo por cada 25 invitados" }
+  ],
+  ceilidh: [
+    { en: "A canapé reception, then courses to the table", es: "Una recepción de canapés y luego tiempos a la mesa" },
+    { en: "Ten bites a head — the longest menu we do", es: "Diez bocados por persona — el menú más largo que hacemos" },
+    { en: "Two chefs on site, one server per eight guests", es: "Dos chefs en el local, un mozo por cada ocho invitados" },
+    { en: "Premium china, glassware and linen, hired and returned", es: "Vajilla, cristalería y mantelería premium, alquiladas y devueltas" },
+    { en: "Menu tasting, and the menu written around your date", es: "Degustación, y el menú escrito alrededor de su fecha" }
   ],
   plated: [
     { en: "Courses to the table, timed to the room", es: "Tiempos a la mesa, al ritmo del evento" },

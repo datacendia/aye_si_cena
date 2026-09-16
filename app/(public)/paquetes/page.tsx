@@ -43,7 +43,7 @@ export default async function PaquetesPage() {
         <p className="mt-4 max-w-2xl text-ink-2">{t("pub.pkgLede")}</p>
       </section>
 
-      <section className="grid gap-5 py-10 lg:grid-cols-3">
+      <section className="grid gap-5 py-10 sm:grid-cols-2 lg:grid-cols-3">
         {packages.map((p) => (
           <div key={p.id} className="flex flex-col rounded-xl border border-line bg-surface p-6">
             <h2 className="font-display text-2xl font-semibold tracking-tight">{p.name}</h2>
@@ -59,6 +59,12 @@ export default async function PaquetesPage() {
                 <span className="mt-1 block font-mono text-[11px] text-ink-3">
                   {t("pub.pkgPerGuest")}
                 </span>
+                {p.typicalPerGuest > p.fromPerGuest && (
+                  <span className="mt-2 block font-mono text-[11px] text-ink-2">
+                    {t("pub.pkgTypical")}{" "}
+                    <span className="tnum">S/ {p.fromPerGuest}–{p.typicalPerGuest}</span>
+                  </span>
+                )}
               </p>
             )}
 

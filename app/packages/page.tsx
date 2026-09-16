@@ -3,12 +3,21 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { TIERS, STAFF_SHIFT_COST, CHEF_SHIFT_COST, IGV_RATE, soles } from "@/lib/pricing";
 import { menu } from "@/lib/repo/menu";
+import { tierCounts } from "@/lib/tiers";
+import { RECIPES } from "@/data/recipes";
 
 export const metadata: Metadata = { title: "Packages" };
 
 export default async function PackagesPage() {
   const me = await requireViewer();
   const dishes = await menu(me.locale);
+  /*
+   * Counted through lib/tiers.ts, not `d.tiers.includes(...)`. Two of the five
+   * tiers are derived from the dish rather than listed in the spreadsheet's
+   * column, so the direct check reports zero for them and the page reads as if
+   * nothing is available.
+   */
+  const counts = tierCounts(dishes, Object.keys(TIERS) as never[], RECIPES);
 
   return (
     <>
@@ -20,9 +29,9 @@ export default async function PackagesPage() {
         </p>
       </section>
 
-      <section className="grid gap-5 py-10 sm:grid-cols-3">
+      <section className="grid gap-5 py-10 sm:grid-cols-2 lg:grid-cols-3">
         {Object.values(TIERS).map((t) => {
-          const eligible = dishes.filter((d) => d.tiers.includes(t.id)).length;
+          const eligible = counts[t.id] ?? 0;
           return (
             <div key={t.id} className="rounded-xl border border-line bg-surface p-6">
               <h2 className="font-display text-2xl font-semibold">{t.name}</h2>

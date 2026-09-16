@@ -422,11 +422,13 @@ export const COPY: Record<string, Phrase> = {
 
   "pub.pkgHeading": { en: "What it costs", es: "Cuánto cuesta", section: "public" },
   "pub.pkgLede": {
-    en: "Three levels of service from one kitchen. The figures below include IGV and are where a quote starts — the final number depends on the menu, the district, the hour and the guest count.",
-    es: "Tres niveles de servicio desde una sola cocina. Las cifras incluyen IGV y son el punto de partida — el número final depende del menú, el distrito, la hora y la cantidad de invitados.",
+    en: "Five levels of service from one kitchen — a children's party at one end, a tasting menu with a canapé reception at the other. The ranges include IGV and come from real menus priced at each tier. The final number depends on what you choose, the district, the hour and the guest count.",
+    es: "Cinco niveles de servicio desde una sola cocina — una fiesta infantil en un extremo, un menú degustación con recepción de canapés en el otro. Los rangos incluyen IGV y salen de menús reales costeados en cada nivel. El número final depende de lo que elija, el distrito, la hora y la cantidad de invitados.",
     section: "public" },
   "pub.pkgFrom": { en: "from", es: "desde", section: "public" },
   "pub.pkgPerGuest": { en: "per guest, IGV included", es: "por invitado, IGV incluido", section: "public" },
+  "pub.pkgTypical": { en: "most events", es: "la mayoría de los eventos", section: "public" },
+  "pub.pkgTo": { en: "to", es: "a", section: "public" },
   "pub.pkgMinimum": { en: "Minimum", es: "Mínimo", section: "public" },
   "pub.pkgGuests": { en: "guests", es: "invitados", section: "public" },
   "pub.pkgAvailable": { en: "dishes at this tier", es: "platos en este nivel", section: "public" },

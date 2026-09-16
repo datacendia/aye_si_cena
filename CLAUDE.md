@@ -10,6 +10,16 @@ A Next.js app and a single-file HTML menu, built from one spreadsheet.
 event in Lima — IGV at 18%, transport by district and hour, the liquor
 *giro especial*, and the *vedas*, the legal closed seasons for fish.
 
+## Five service tiers
+
+`ninos` (Wee Feast), `scran`, `buffet`, `plated`, `ceilidh` (The Ceilidh Table).
+Three read the spreadsheet's `tiers` column; two are derived in `lib/tiers.ts`.
+Never ask `dish.tiers.includes(tier)` — ask `dishFitsTier` / `dishesForTier`,
+or the two derived tiers report zero dishes. A test bans the raw form.
+
+The children's tier excludes alcohol absolutely, which is not the same rule as
+`needsLicence`.
+
 ## Who can see what
 
 `/`, `/carta`, `/paquetes`, `/eventos` are public. Everything else needs a

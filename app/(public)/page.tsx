@@ -99,7 +99,7 @@ export default async function PublicHome() {
         </h2>
         <p className="mt-2 max-w-2xl text-ink-2">{t("pub.pkgLede")}</p>
 
-        <div className="mt-8 grid gap-5 sm:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {packages.map((p) => (
             <div key={p.id} className="rounded-xl border border-line bg-surface p-6">
               <h3 className="font-display text-xl font-semibold">{p.name}</h3>
@@ -118,6 +118,8 @@ export default async function PublicHome() {
               )}
               <p className="mt-3 font-mono text-xs text-ink-3">
                 {t("pub.pkgMinimum")} {p.minGuests} {t("pub.pkgGuests")}
+                {" · "}
+                <span className="tnum">{p.dishes}</span> {t("pub.dishes")}
               </p>
             </div>
           ))}

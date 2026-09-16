@@ -60,6 +60,30 @@ export const STAFF_SHIFT_COST = 100; // freelance waiter or prep chef, 6-8h shif
 export const CHEF_SHIFT_COST = 180; // on-site chef, plating service
 
 export const TIERS: Record<ServiceTier, TierRules> = {
+  /*
+   * A children's party.
+   *
+   * Not a cheaper version of the boxes — a different job. Everything arrives
+   * cold or at room temperature in one drop, there is no crew, and the whole
+   * menu is drawn from dishes lib/dietary.ts says are kid-friendly and that
+   * carry no alcohol at all. The licence rule is absolute here: cooking with
+   * alcohol is legal without the giro especial, but nothing containing it goes
+   * to a room full of eight-year-olds.
+   *
+   * Six bites rather than eight because children eat less and waste more, and
+   * a box that comes back half full is a complaint whatever it cost.
+   */
+  ninos: {
+    id: "ninos",
+    name: "Wee Feast",
+    minGuests: 10,
+    menajePerGuest: 0,
+    packagingPerGuest: 5,
+    guestsPerWaiter: 0,
+    chefs: 0,
+    transport: 60,
+    bitesPerGuest: 6
+  },
   scran: {
     id: "scran",
     name: "Scran Boxes",
@@ -92,6 +116,33 @@ export const TIERS: Record<ServiceTier, TierRules> = {
     chefs: 1,
     transport: 300,
     bitesPerGuest: 6
+  },
+
+  /*
+   * The top of the range.
+   *
+   * A reception standing with a drink, then courses to the table — so ten
+   * bites a head rather than six, and the guest count is low because that is
+   * what this service is: a wedding top table, a company's twelve most
+   * important people, an anniversary.
+   *
+   * The staffing is where the money goes and it is not a markup. One server
+   * per eight guests and two chefs is what timing courses to a room actually
+   * takes; at one per twelve the third course arrives cold. The menaje figure
+   * is premium hire — proper glassware, linen rather than paper — and the van
+   * goes three times because the reception kit, the service kit and the
+   * returns are three different loads.
+   */
+  ceilidh: {
+    id: "ceilidh",
+    name: "The Ceilidh Table",
+    minGuests: 12,
+    menajePerGuest: 45,
+    packagingPerGuest: 0,
+    guestsPerWaiter: 8,
+    chefs: 2,
+    transport: 380,
+    bitesPerGuest: 10
   }
 };
 

@@ -52,16 +52,21 @@ export const GENERATOR_HIRE = 280;
  * food, menaje and kit, and the menaje comes back afterwards.
  */
 export const VAN_TRIPS: Record<ServiceTier, number> = {
+  ninos: 1,
   scran: 1,
   buffet: 2,
-  plated: 2
+  plated: 2,
+  // Reception canapés, then courses, then the menaje home again.
+  ceilidh: 3
 };
 
 /** Crew on the load-in, by tier. */
 export const LOAD_CREW: Record<ServiceTier, number> = {
+  ninos: 1,
   scran: 1,
   buffet: 2,
-  plated: 3
+  plated: 3,
+  ceilidh: 4
 };
 
 export interface TransportInput {

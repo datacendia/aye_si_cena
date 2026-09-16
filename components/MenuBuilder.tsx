@@ -12,7 +12,12 @@ import { DISTRICTS, VENUE_TYPES } from "@/data/venues";
 
 
 export default function MenuBuilder(
-  { dishes, categories }: { dishes: Dish[]; categories: Record<string, string> }
+  { dishes, categories, eligible }: {
+    dishes: Dish[];
+    categories: Record<string, string>;
+    /** Dish ids per tier, resolved on the server — see lib/tiers.ts. */
+    eligible: Record<string, number[]>;
+  }
 ) {
   const [tier, setTier] = useState<ServiceTier>("plated");
   const [guests, setGuests] = useState(20);
@@ -30,7 +35,7 @@ export default function MenuBuilder(
 
   // A dish only appears if it is offered at the chosen tier.
   const available = useMemo(
-    () => dishes.filter((d) => d.tiers.includes(tier)),
+    () => dishes.filter((d) => (eligible[tier] ?? []).includes(d.id)),
     [dishes, tier]
   );
 

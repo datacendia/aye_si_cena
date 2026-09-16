@@ -106,7 +106,12 @@ for (const ing of INGREDIENTS) {
 }
 
 // --- tier rules, mirrored from lib/pricing.ts ------------------------------
+// __tests__/standalone-tiers.test.ts fails if this and TIERS there drift apart.
 const TIERS = {
+  ninos: {
+    id: "ninos", name: "Wee Feast", minGuests: 10, menajePerGuest: 0,
+    packagingPerGuest: 5, guestsPerWaiter: 0, chefs: 0, transport: 60, bitesPerGuest: 6
+  },
   scran: {
     id: "scran", name: "Scran Boxes", minGuests: 8, menajePerGuest: 0,
     packagingPerGuest: 7, guestsPerWaiter: 0, chefs: 0, transport: 60, bitesPerGuest: 8
@@ -118,6 +123,10 @@ const TIERS = {
   plated: {
     id: "plated", name: "The Aye Si Plated Experience", minGuests: 20, menajePerGuest: 27.5,
     packagingPerGuest: 0, guestsPerWaiter: 12, chefs: 1, transport: 300, bitesPerGuest: 6
+  },
+  ceilidh: {
+    id: "ceilidh", name: "The Ceilidh Table", minGuests: 12, menajePerGuest: 45,
+    packagingPerGuest: 0, guestsPerWaiter: 8, chefs: 2, transport: 380, bitesPerGuest: 10
   }
 };
 
@@ -224,7 +233,8 @@ const payload = JSON.stringify({ dishes: OUT_DISHES, clientBuild: CLIENT_BUILD, 
   subPrices: CLIENT_BUILD ? EMPTY : SUB_PREP_PRICES,
   sundryPrices: CLIENT_BUILD ? EMPTY : NON_FOOD_PRICES, alias: COMPOUND_ALIAS, sundries: NON_FOOD,
   trip: { vanHourly: 45, perKm: 1.8, crewHourly: 18, generator: 280,
-          vanTrips: { scran:1, buffet:2, plated:2 }, loadCrew: { scran:1, buffet:2, plated:3 } },
+          vanTrips: { ninos:1, scran:1, buffet:2, plated:2, ceilidh:3 },
+          loadCrew: { ninos:1, scran:1, buffet:2, plated:3, ceilidh:4 } },
   formats: { "drop-off": "Drop-off", buffet: "Buffet", plated: "Plated", "live-station": "Live station" },
   cap: { fryer: 2, oven: 4, liveStation: 2, griddle: 3 },
   lead: { cold: 1440, oven: 240, hob: 180, griddle: 30, fryer: 15 },
@@ -1484,7 +1494,32 @@ function dishDietary(recipe){
 // Exposed so verify-standalone can hold this port to lib/dietary.ts.
 var DIET_INDEX = {};
 RECIPES.forEach(function(r){ DIET_INDEX[r.dishId] = dishDietary(r); });
+
+/*
+ * Which dishes a tier can carry. Mirrors lib/tiers.ts.
+ *
+ * Three tiers read the dish's own tiers column. Two are derived: the Wee
+ * Feast is kid-friendly box food with no alcohol in it at all — the licence
+ * flag is about SELLING alcohol, but a children's party is not a licensing
+ * question — and the Ceilidh Table carries anything that can be plated.
+ */
+function fitsTier(d, tier){
+  if (tier === "ceilidh") return d.tiers.indexOf("plated") > -1;
+  if (tier === "ninos"){
+    if (d.tiers.indexOf("scran") === -1) return false;
+    if (d.needsLicence) return false;
+    var p = DIET_INDEX[d.id];
+    // No recipe written yet, or an ingredient nobody has classified: claims
+    // nothing. "Probably fine for children" is not an answer.
+    if (!p || p.unknown.length) return false;
+    return p.suits.indexOf("kid-friendly") > -1;
+  }
+  return d.tiers.indexOf(tier) > -1;
+}
+function dishesAtTier(tier){ return DISHES.filter(function(d){ return fitsTier(d, tier); }); }
 window.__dietIndex = DIET_INDEX;
+// Read by scripts/verify-standalone.mjs so the tier count is never pinned here.
+window.__tiers = TIERS;
 
 function dietLabel(id){
   for (var i = 0; i < DIETS.length; i++) if (DIETS[i][0] === id) return DIETS[i][1];
@@ -2523,7 +2558,7 @@ renderRecipes();
 // --- packages ------------------------------------------------------------
 document.getElementById("pkgCards").innerHTML = Object.keys(TIERS).map(function(k){
   var t = TIERS[k];
-  var n = DISHES.filter(function(d){ return d.tiers.indexOf(t.id) > -1; }).length;
+  var n = dishesAtTier(t.id).length;
   function row(l,v){ return "<div class='kv'><dt>" + l + "</dt><dd class='tnum'>" + v + "</dd></div>"; }
   return "<div class='card'><h2 class='h-sm'>" + esc(t.name) + "</h2>" +
     "<p class='src' style='margin:5px 0 14px'>" + n + " dishes available at this tier</p><dl style='margin:0'>" +
@@ -3089,9 +3124,9 @@ cmpGuestsEl.addEventListener("input", renderCompare);
 
 function renderCompare(){
   var guests = Math.max(1, parseInt(cmpGuestsEl.value, 10) || 1);
-  document.getElementById("cmpBody").innerHTML = ["scran","buffet","plated"].map(function(tid){
+  document.getElementById("cmpBody").innerHTML = ["ninos","scran","buffet","plated","ceilidh"].map(function(tid){
     var t = TIERS[tid];
-    var pool = DISHES.filter(function(d){ return d.tiers.indexOf(tid) > -1; });
+    var pool = dishesAtTier(tid);
     var menu = [];
     ["canape","main","side","dessert"].forEach(function(cat){
       var best = pool.filter(function(d){ return d.category === cat; })
@@ -3611,7 +3646,7 @@ document.getElementById("pickBody").addEventListener("click", function(e){
 function render(){
   var t = TIERS[tier];
   var guests = Math.max(1, parseInt(guestsEl.value,10) || 1);
-  var available = DISHES.filter(function(d){ return d.tiers.indexOf(tier) > -1; });
+  var available = dishesAtTier(tier);
   var selected  = available.filter(function(d){ return picked.indexOf(d.id) > -1; });
 
   document.getElementById("minNote").textContent = "minimum " + t.minGuests + " for this tier";

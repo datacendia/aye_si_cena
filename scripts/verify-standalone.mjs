@@ -260,12 +260,23 @@ if (liveShown !== liveExpected) failures++;
 console.log(`\nformat axis · live-station  ${liveShown} ${liveShown === liveExpected ? "✓" : "✗ expected " + liveExpected}`);
 await page.locator('[data-fmt="live-station"]').click();
 
-// Compare: three tiers, each quoting a positive per-guest figure.
+/*
+ * Compare: one card per tier, each quoting a positive per-guest figure.
+ *
+ * The expected number is read out of the file rather than written here. It was
+ * pinned at 3 and the business grew to 5, so the check failed on a page that
+ * was working perfectly — which is the kind of failure that teaches people to
+ * ignore a verifier.
+ */
 await page.getByRole("tab", { name: "Compare" }).click();
 await page.waitForTimeout(150);
+const tierCount = await page.evaluate(() => Object.keys(window.__tiers ?? {}).length);
 const cards = await page.locator("#cmpBody .card").count();
-if (cards !== 3) failures++;
-console.log(`compare tiers rendered: ${cards} ${cards === 3 ? "✓" : "✗ expected 3"}`);
+if (cards !== tierCount || tierCount < 3) failures++;
+console.log(
+  `compare tiers rendered: ${cards} of ${tierCount} ` +
+  `${cards === tierCount && tierCount >= 3 ? "✓" : `✗ expected ${tierCount}`}`
+);
 
 // Graph: the orphan count is a finding to report, not a number to pin. The
 // network itself is checked further down, after the simulation has cooled.

@@ -11,7 +11,16 @@ export type Category =
   | "bakery"
   | "dessert";
 
-export type ServiceTier = "scran" | "buffet" | "plated";
+/**
+ * How the food reaches the guest, and therefore what it costs to deliver.
+ *
+ * Three of these come from the spreadsheet, which carries a `tiers` column per
+ * dish. Two do not: "ninos" and "ceilidh" are derived by rule in
+ * lib/tiers.ts from what a dish already says about itself — because tier
+ * membership that has to be re-typed into a column for 223 rows is a column
+ * that goes stale, and this repository has been there.
+ */
+export type ServiceTier = "ninos" | "scran" | "buffet" | "plated" | "ceilidh";
 
 /** How the dish reaches the guest. Constrains which tiers can carry it. */
 export type ServiceFormat = "drop-off" | "buffet" | "plated" | "live-station";
